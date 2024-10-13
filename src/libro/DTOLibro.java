@@ -3,12 +3,12 @@ package libro;
 /**
  * The type Dto libro (Book).
  *
- * @version 1.1
+ * @version 1.2
  */
 public class DTOLibro {
     private Integer id;
     private String titulo;
-    private Integer isbn;
+    private String isbn;
 
     /**
      * Instantiates a new Dto libro (Book).
@@ -16,7 +16,7 @@ public class DTOLibro {
      * @param titulo the title
      * @param isbn   the isbn
      */
-    public DTOLibro(String titulo, Integer isbn) {
+    public DTOLibro(String titulo, String isbn) {
         this.titulo = titulo;
         this.isbn = isbn;
     }
@@ -62,7 +62,7 @@ public class DTOLibro {
      *
      * @return the isbn
      */
-    public Integer getIsbn() {
+    public String getIsbn() {
         return isbn;
     }
 
@@ -71,7 +71,7 @@ public class DTOLibro {
      *
      * @param isbn the isbn
      */
-    public void setIsbn(Integer isbn) {
+    public void setIsbn(String isbn) {
         this.isbn = isbn;
     }
 
