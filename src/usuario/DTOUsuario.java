@@ -3,7 +3,7 @@ package usuario;
 /**
  * The type Dto usuario (User).
  *
- * @version 1.0
+ * @version 1.1
  */
 public class DTOUsuario {
     private Integer id;

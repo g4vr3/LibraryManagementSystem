@@ -5,7 +5,7 @@ import java.sql.Date;
 /**
  * The type Dto prestamo (Loan).
  *
- * @version 1.0
+ * @version 1.1
  */
 public class DTOPrestamo {
     private Integer id;

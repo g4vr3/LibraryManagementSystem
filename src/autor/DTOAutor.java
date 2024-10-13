@@ -3,7 +3,7 @@ package autor;
 /**
  * The type Dto autor (Author).
  *
- * @version 1.0
+ * @version 1.1
  */
 public class DTOAutor {
     private Integer id;

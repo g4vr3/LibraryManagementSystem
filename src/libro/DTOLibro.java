@@ -3,7 +3,7 @@ package libro;
 /**
  * The type Dto libro (Book).
  *
- * @version 1.0
+ * @version 1.1
  */
 public class DTOLibro {
     private Integer id;
