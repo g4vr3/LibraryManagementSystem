@@ -1,5 +1,7 @@
 package main;
 
+import jdbc.DDL;
+
 /**
  * The type Main.
  */
@@ -10,6 +12,6 @@ public class Main {
      * @param args the input arguments
      */
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        DDL.getConnection();
     }
 }

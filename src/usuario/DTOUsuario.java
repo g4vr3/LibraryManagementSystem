@@ -23,7 +23,6 @@ public class DTOUsuario {
      *
      * @return the id
      */
-// Getters, Setters
     public Integer getId() {
         return id;
     }
@@ -55,8 +54,11 @@ public class DTOUsuario {
         this.nombre = nombre;
     }
 
-    // toString
-
+    /**
+     * Returns a string representation of the DTOUsuario object.
+     *
+     * @return a string representation of the object
+     */
     @Override
     public String toString() {
         return "DTOUsuario{" +

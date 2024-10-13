@@ -74,7 +74,12 @@ public class DTOLibro {
     public void setIsbn(Integer isbn) {
         this.isbn = isbn;
     }
-    
+
+    /**
+     * Returns a string representation of the DTOLibro object.
+     *
+     * @return a string representation of the object
+     */
     @Override
     public String toString() {
         return "DTOLibro{" +

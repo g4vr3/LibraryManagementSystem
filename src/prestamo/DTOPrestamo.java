@@ -28,7 +28,6 @@ public class DTOPrestamo {
      *
      * @return the id
      */
-// Getters, Setters
     public Integer getId() {
         return id;
     }
@@ -78,7 +77,11 @@ public class DTOPrestamo {
         this.fechaFin = fechaFin;
     }
 
-    // toString
+    /**
+     * Returns a string representation of the DTOPrestamo object.
+     *
+     * @return a string representation of the object
+     */
     @Override
     public String toString() {
         return "DTOPrestamo{" +

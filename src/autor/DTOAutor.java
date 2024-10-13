@@ -23,7 +23,6 @@ public class DTOAutor {
      *
      * @return the id
      */
-// Getters, Setters
     public Integer getId() {
         return id;
     }
@@ -55,8 +54,11 @@ public class DTOAutor {
         this.nombre = nombre;
     }
 
-    // toString
-
+    /**
+     * Returns a string representation of the DTOAutor object.
+     *
+     * @return a string representation of the object
+     */
     @Override
     public String toString() {
         return "DTOAutor{" +
