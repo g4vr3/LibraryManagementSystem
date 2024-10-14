@@ -7,13 +7,13 @@ import java.util.ArrayList;
 /**
  * The DAOPrestamo class handles CRUD operations for the Prestamo (Loan) entity.
  *
- * @version 1.0
+ * @version 2.0
  */
 public class DAOPrestamo {
-    private static final String CREATE = "INSERT INTO Prestamo (fechaInicio, fechaFin) VALUES (?, ?)";
+    private static final String CREATE = "INSERT INTO Prestamo (fechaInicio, fechaFin, usuarioId, libroId) VALUES (?, ?, ?, ?)";
     private static final String READ = "SELECT * FROM Prestamo WHERE ID = ?";
     private static final String READ_ALL = "SELECT * FROM Prestamo";
-    private static final String UPDATE = "UPDATE Prestamo SET fechaInicio = ?, fechaFin = ? WHERE ID = ?";
+    private static final String UPDATE = "UPDATE Prestamo SET fechaInicio = ?, fechaFin = ?, usuarioId = ?, libroId = ? WHERE ID = ?";
     private static final String DELETE = "DELETE FROM Prestamo WHERE ID = ?";
 
     private static Connection conexion;
@@ -142,10 +142,15 @@ public class DAOPrestamo {
     private DTOPrestamo getPrestamo(ResultSet rs) {
         DTOPrestamo prestamo = null;
         try {
+            // get data from query result
             Date fechaInicio = rs.getDate("fechaInicio");
             Date fechaFin = rs.getDate("fechaFin");
-            prestamo = new DTOPrestamo(fechaInicio, fechaFin);
-            prestamo.setId(rs.getInt("ID")); // Assign the ID from the database
+            int usuarioId = rs.getInt("usuarioId");
+            int libroId = rs.getInt("libroId");
+
+            // create a new DTOPrestamo object with the retrieved data
+            prestamo = new DTOPrestamo(fechaInicio, fechaFin, usuarioId, libroId);
+            prestamo.setId(rs.getInt("id")); // Assign the ID from the database
         } catch (SQLException e) {
             System.err.println("Error al leer ResultSet: " + e.getMessage());
         }

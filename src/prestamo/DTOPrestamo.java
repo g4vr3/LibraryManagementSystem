@@ -3,30 +3,36 @@ package prestamo;
 import java.sql.Date;
 
 /**
- * The type Dto prestamo (Loan).
+ * The type DTOPrestamo class encapsulate the details for the Prestamo (Loan) entity.
  *
- * @version 1.1
+ * @version 2.0
  */
 public class DTOPrestamo {
     private Integer id;
     private Date fechaInicio;
     private Date fechaFin;
+    private int usuarioId;
+    private int libroId;
 
     /**
      * Instantiates a new Dto prestamo (Loan).
      *
-     * @param fechaInicio the start date
-     * @param fechaFin    the end date
+     * @param fechaInicio the loan start date
+     * @param fechaFin    the loan end date
+     * @param usuarioId  the user id borrowing the book
+     * @param libroId the being borrowed book id
      */
-    public DTOPrestamo(Date fechaInicio, Date fechaFin) {
+    public DTOPrestamo(Date fechaInicio, Date fechaFin, int usuarioId, int libroId) {
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
+        this.usuarioId = usuarioId;
+        this.libroId = libroId;
     }
 
     /**
      * Gets id.
      *
-     * @return the id
+     * @return the loan id
      */
     public Integer getId() {
         return id;
@@ -35,46 +41,82 @@ public class DTOPrestamo {
     /**
      * Sets id.
      *
-     * @param id the id
+     * @param id the loan id
      */
     public void setId(Integer id) {
         this.id = id;
     }
 
     /**
-     * Gets fecha inicio.
+     * Gets fechaInicio.
      *
-     * @return the start date
+     * @return the loan start date
      */
     public Date getFechaInicio() {
         return fechaInicio;
     }
 
     /**
-     * Sets fecha inicio.
+     * Sets fechaInicio.
      *
-     * @param fechaInicio the start date
+     * @param fechaInicio the loan start date
      */
     public void setFechaInicio(Date fechaInicio) {
         this.fechaInicio = fechaInicio;
     }
 
     /**
-     * Gets fecha fin.
+     * Gets fechaFin.
      *
-     * @return the end date
+     * @return the loan end date
      */
     public Date getFechaFin() {
         return fechaFin;
     }
 
     /**
-     * Sets fecha fin.
+     * Sets fechaFin.
      *
-     * @param fechaFin the end date
+     * @param fechaFin the loan end date
      */
     public void setFechaFin(Date fechaFin) {
         this.fechaFin = fechaFin;
+    }
+
+    /**
+     * Gets usuarioId.
+     *
+     * @return the user id borrowing the book
+     */
+    public int getUsuarioId() {
+        return usuarioId;
+    }
+
+    /**
+     * Sets usuarioId.
+     *
+     * @param usuarioId the user id borrowing the book
+     */
+    public void setUsuarioId(int usuarioId) {
+        this.usuarioId = usuarioId;
+    }
+
+    /**
+     * Gets libroId.
+     *
+     * @return the being borrowed book id
+     */
+    public int getLibroId() {
+        return libroId;
+    }
+
+    /**
+     * Sets libroId.
+     *
+     * @param libroId the being borrowed book id
+     */
+    public void setLibroId(int libroId) {
+        this.libroId = libroId;
     }
 
     /**
@@ -88,6 +130,8 @@ public class DTOPrestamo {
                 "id=" + id +
                 ", fechaInicio=" + fechaInicio +
                 ", fechaFin=" + fechaFin +
+                ", usuarioId=" + usuarioId +
+                ", libroId=" + libroId +
                 '}';
     }
 }
