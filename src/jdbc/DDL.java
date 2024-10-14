@@ -55,7 +55,11 @@ public class DDL {
         }
     }
 
-    // Create the database
+    /**
+     * Create the Database.
+     *
+     * @throws SQLException the SQL exception
+     */
     private void createDatabase() throws SQLException {
         String createDbQuery = "CREATE DATABASE " + DB;
         Statement stmt = conexion.createStatement();

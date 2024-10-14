@@ -1,7 +1,7 @@
 package usuario;
 
 /**
- * The type Dto usuario (User).
+ * The type DTOUsuario class encapsulate the details for the usuario (User) entity.
  *
  * @version 1.1
  */

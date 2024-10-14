@@ -1,7 +1,7 @@
 package autor;
 
 /**
- * The type Dto autor (Author).
+ * The type DTOAutor class encapsulate the details for the Autor (Author) entity.
  *
  * @version 1.1
  */

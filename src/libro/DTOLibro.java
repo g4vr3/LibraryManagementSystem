@@ -1,7 +1,7 @@
 package libro;
 
 /**
- * The type Dto libro (Book).
+ * The type DTOLibro class encapsulate the details for the Libro (Book) entity.
  *
  * @version 1.2
  */
