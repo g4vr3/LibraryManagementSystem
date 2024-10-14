@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * The DAOUsuario class handles CRUD operations for the Usuario (User) entity.
  *
- * @version 1.0
+ * @version 1.0.1
  */
 public class DAOUsuario {
     private static final String CREATE = "INSERT INTO Usuario (nombre) VALUES (?)";
@@ -142,7 +142,7 @@ public class DAOUsuario {
         try {
             String nombre = rs.getString("nombre");
             usuario = new DTOUsuario(nombre);
-            usuario.setId(rs.getInt("ID")); // Assign the ID from the database
+            usuario.setId(rs.getInt("id")); // Assign the ID from the database
         } catch (SQLException e) {
             System.err.println("Error al leer ResultSet: " + e.getMessage());
         }

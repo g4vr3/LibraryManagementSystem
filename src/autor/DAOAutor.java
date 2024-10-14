@@ -8,7 +8,7 @@ import java.util.ArrayList;
 /**
  * The DAOAutor class handles CRUD operations for the Autor (Author) entity.
  *
- * @version 1.0
+ * @version 1.0.1
  */
 public class DAOAutor {
     private static final String CREATE = "INSERT INTO Autor (nombre) VALUES (?)";
@@ -143,7 +143,7 @@ public class DAOAutor {
         try {
             String nombre = rs.getString("nombre");
             autor = new DTOAutor(nombre);
-            autor.setId(rs.getInt("ID")); // Assign the ID from the database
+            autor.setId(rs.getInt("id")); // Assign the ID from the database
         } catch (SQLException e) {
             System.err.println("Error al leer ResultSet: " + e.getMessage());
         }

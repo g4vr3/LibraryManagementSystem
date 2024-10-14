@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * The DAOLibro class handles CRUD operations for the Libro (Book) entity.
  *
- * @version 1.0
+ * @version 1.0.1
  */
 public class DAOLibro {
     private static final String CREATE = "INSERT INTO Libro (titulo, isbn) VALUES (?, ?)";
@@ -145,7 +145,7 @@ public class DAOLibro {
             String titulo = rs.getString("titulo");
             String isbn = rs.getString("isbn");
             libro = new DTOLibro(titulo, isbn);
-            libro.setId(rs.getInt("ID")); // Assign the ID from the database
+            libro.setId(rs.getInt("id")); // Assign the ID from the database
         } catch (SQLException e) {
             System.err.println("Error al leer ResultSet: " + e.getMessage());
         }
