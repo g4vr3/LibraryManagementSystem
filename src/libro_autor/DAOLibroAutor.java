@@ -1,9 +1,10 @@
 package libro_autor;
 
+import exception.ServiceException;
 import jdbc.DDL;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * The DAOLibroAutor class handles CRUD operations for the Libro_Autor (Book_Author) relationship.
@@ -29,16 +30,15 @@ public class DAOLibroAutor {
      *
      * @param libroId The ID of the book.
      * @param autorId The ID of the author.
-     * @return true if the relationship was successfully created, false otherwise.
+     * @throws ServiceException if there is an error during creation.
      */
-    public boolean create(int libroId, int autorId) {
+    public void create(int libroId, int autorId) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(CREATE)) {
             pst.setInt(1, libroId);
             pst.setInt(2, autorId);
-            return pst.executeUpdate() > 0; // true if successfully created
+            pst.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error al crear relación libro-autor: " + e.getMessage());
-            return false;
+            throw new ServiceException("Error al crear relación libro-autor: " + e.getMessage());
         }
     }
 
@@ -47,8 +47,9 @@ public class DAOLibroAutor {
      *
      * @param libroId The ID of the book.
      * @return A list of relationships found, or an empty list if none found.
+     * @throws ServiceException if there is an error during reading.
      */
-    public List<DTOLibroAutor> readByLibro(int libroId) {
+    public List<DTOLibroAutor> readByLibro(int libroId) throws ServiceException {
         List<DTOLibroAutor> relaciones = new ArrayList<>();
         try (PreparedStatement pst = conexion.prepareStatement(READ_BY_LIBRO)) {
             pst.setInt(1, libroId);
@@ -57,7 +58,7 @@ public class DAOLibroAutor {
                 relaciones.add(getLibroAutor(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error al leer relaciones por libro: " + e.getMessage());
+            throw new ServiceException("Error al leer relaciones por libro: " + e.getMessage());
         }
         return relaciones;
     }
@@ -67,8 +68,9 @@ public class DAOLibroAutor {
      *
      * @param autorId The ID of the author.
      * @return A list of relationships found, or an empty list if none found.
+     * @throws ServiceException if there is an error during reading.
      */
-    public List<DTOLibroAutor> readByAutor(int autorId) {
+    public List<DTOLibroAutor> readByAutor(int autorId) throws ServiceException {
         List<DTOLibroAutor> relaciones = new ArrayList<>();
         try (PreparedStatement pst = conexion.prepareStatement(READ_BY_AUTOR)) {
             pst.setInt(1, autorId);
@@ -77,7 +79,7 @@ public class DAOLibroAutor {
                 relaciones.add(getLibroAutor(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error al leer relaciones por autor: " + e.getMessage());
+            throw new ServiceException("Error al leer relaciones por autor: " + e.getMessage());
         }
         return relaciones;
     }
@@ -86,8 +88,9 @@ public class DAOLibroAutor {
      * Reads all book-author relationships from the database.
      *
      * @return A list of all relationships in the database.
+     * @throws ServiceException if there is an error during reading.
      */
-    public List<DTOLibroAutor> readAll() {
+    public List<DTOLibroAutor> readAll() throws ServiceException {
         List<DTOLibroAutor> relaciones = new ArrayList<>();
         try (Statement st = conexion.createStatement();
              ResultSet rs = st.executeQuery(READ_ALL)) {
@@ -95,7 +98,7 @@ public class DAOLibroAutor {
                 relaciones.add(getLibroAutor(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error al leer todas las relaciones libro-autor: " + e.getMessage());
+            throw new ServiceException("Error al leer todas las relaciones libro-autor: " + e.getMessage());
         }
         return relaciones;
     }
@@ -105,16 +108,15 @@ public class DAOLibroAutor {
      *
      * @param rs The ResultSet from a query.
      * @return A LibroAutor object representing the book-author relationship.
+     * @throws ServiceException if there is an error during the conversion.
      */
-    private DTOLibroAutor getLibroAutor(ResultSet rs) {
-        DTOLibroAutor libroAutor = null;
+    private DTOLibroAutor getLibroAutor(ResultSet rs) throws ServiceException {
         try {
             int libroId = rs.getInt("libroId");
             int autorId = rs.getInt("autorId");
-            libroAutor = new DTOLibroAutor(libroId, autorId);
+            return new DTOLibroAutor(libroId, autorId);
         } catch (SQLException e) {
-            System.err.println("Error al leer ResultSet: " + e.getMessage());
+            throw new ServiceException("Error al leer ResultSet: " + e.getMessage());
         }
-        return libroAutor;
     }
 }
