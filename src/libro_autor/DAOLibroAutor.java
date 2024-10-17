@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /**
  * The DAOLibroAutor class handles CRUD operations for the Libro_Autor (Book_Author) relationship.
  *
- * @version 1.0
+ * @version 1.1
  */
 public class DAOLibroAutor {
     private static final String CREATE = "INSERT INTO LibroAutor (libroId, autorId) VALUES (?, ?)";
