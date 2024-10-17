@@ -1,5 +1,6 @@
 package prestamo;
 
+import exception.ServiceException;
 import jdbc.DDL;
 import java.sql.*;
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.ArrayList;
 /**
  * The DAOPrestamo class handles CRUD operations for the Prestamo (Loan) entity.
  *
- * @version 2.0
+ * @version 2.1
  */
 public class DAOPrestamo {
     private static final String CREATE = "INSERT INTO Prestamo (fechaInicio, fechaFin, usuarioId, libroId) VALUES (?, ?, ?, ?)";
@@ -15,7 +16,6 @@ public class DAOPrestamo {
     private static final String READ_ALL = "SELECT * FROM Prestamo";
     private static final String UPDATE = "UPDATE Prestamo SET fechaInicio = ?, fechaFin = ?, usuarioId = ?, libroId = ? WHERE ID = ?";
     private static final String DELETE = "DELETE FROM Prestamo WHERE ID = ?";
-
     private static Connection conexion;
 
     /**
@@ -29,25 +29,22 @@ public class DAOPrestamo {
      * Creates a new loan in the database.
      *
      * @param prestamo The loan object containing the start and end dates.
-     * @return true if the loan was successfully created, false otherwise.
+     * @throws ServiceException if there is an error during the creation.
      */
-    public boolean create(DTOPrestamo prestamo) {
+    public void create(DTOPrestamo prestamo) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(CREATE, Statement.RETURN_GENERATED_KEYS)) {
             pst.setDate(1, prestamo.getFechaInicio());
             pst.setDate(2, prestamo.getFechaFin());
-            boolean successful = pst.executeUpdate() > 0; // true if successfully created
-
-            if (successful) {
-                try (ResultSet rs = pst.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        prestamo.setId(rs.getInt(1)); // Set the generated ID
-                    }
+            pst.setInt(3, prestamo.getUsuarioId());
+            pst.setInt(4, prestamo.getLibroId());
+            pst.executeUpdate();
+            try (ResultSet rs = pst.getGeneratedKeys()) {
+                if (rs.next()) {
+                    prestamo.setId(rs.getInt(1)); // Set the generated ID
                 }
             }
-            return successful;
         } catch (SQLException e) {
-            System.err.println("Error al crear prestamo: " + e.getMessage());
-            return false;
+            throw new ServiceException("Error al crear prestamo: " + e.getMessage());
         }
     }
 
@@ -56,27 +53,29 @@ public class DAOPrestamo {
      *
      * @param id The ID of the loan to read.
      * @return A DTOPrestamo object containing the loan's information, or null if not found.
+     * @throws ServiceException if there is an error during the read.
      */
-    public DTOPrestamo read(int id) {
-        DTOPrestamo prestamo = null;
+    public DTOPrestamo read(int id) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(READ)) {
             pst.setInt(1, id);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                prestamo = getPrestamo(rs); // Convert the result to a DTOPrestamo
+                return getPrestamo(rs); // Convert the result to a DTOPrestamo
+            } else {
+                return null;
             }
         } catch (SQLException e) {
-            System.err.println("Error al leer prestamo: " + e.getMessage());
+            throw new ServiceException("Error al leer prestamo: " + e.getMessage());
         }
-        return prestamo;
     }
 
     /**
      * Reads all loans from the database.
      *
      * @return An ArrayList of DTOPrestamo objects representing all loans in the database.
+     * @throws ServiceException if there is an error during the read.
      */
-    public ArrayList<DTOPrestamo> readAll() {
+    public ArrayList<DTOPrestamo> readAll() throws ServiceException {
         ArrayList<DTOPrestamo> prestamos = new ArrayList<>();
         try (Statement st = conexion.createStatement();
              ResultSet rs = st.executeQuery(READ_ALL)) {
@@ -84,7 +83,7 @@ public class DAOPrestamo {
                 prestamos.add(getPrestamo(rs)); // Convert each result to a DTOPrestamo
             }
         } catch (SQLException e) {
-            System.err.println("Error al leer todos los prestamos: " + e.getMessage());
+            throw new ServiceException("Error al leer todos los prestamos: " + e.getMessage());
         }
         return prestamos;
     }
@@ -93,22 +92,19 @@ public class DAOPrestamo {
      * Updates an existing loan's information in the database.
      *
      * @param prestamo The DTOPrestamo object containing the updated loan information.
-     * @return true if the update was successful, false otherwise.
      * @throws IllegalArgumentException if the loan's ID is invalid (less than or equal to 0).
+     * @throws ServiceException if there is an error during the update.
      */
-    public boolean update(DTOPrestamo prestamo) {
-        if (prestamo.getId() <= 0) {
-            throw new IllegalArgumentException("ID de prestamo no válido");
-        }
-
+    public void update(DTOPrestamo prestamo) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(UPDATE)) {
             pst.setDate(1, prestamo.getFechaInicio());
             pst.setDate(2, prestamo.getFechaFin());
-            pst.setInt(3, prestamo.getId());
-            return pst.executeUpdate() > 0; // true if updated successfully
+            pst.setInt(3, prestamo.getUsuarioId());
+            pst.setInt(4, prestamo.getLibroId());
+            pst.setInt(5, prestamo.getId());
+            pst.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error al actualizar prestamo: " + e.getMessage());
-            return false;
+            throw new ServiceException("Error al actualizar prestamo: " + e.getMessage());
         }
     }
 
@@ -116,20 +112,18 @@ public class DAOPrestamo {
      * Deletes a loan from the database.
      *
      * @param prestamo The DTOPrestamo object containing the loan's ID to delete.
-     * @return true if the deletion was successful, false otherwise.
      * @throws IllegalArgumentException if the loan's ID is invalid (less than or equal to 0).
+     * @throws ServiceException if there is an error during the deletion.
      */
-    public boolean delete(DTOPrestamo prestamo) {
+    public void delete(DTOPrestamo prestamo) throws ServiceException {
         if (prestamo.getId() <= 0) {
             throw new IllegalArgumentException("ID de prestamo no válido");
         }
-
         try (PreparedStatement pst = conexion.prepareStatement(DELETE)) {
             pst.setInt(1, prestamo.getId());
-            return pst.executeUpdate() > 0; // true if deleted successfully
+            pst.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error al eliminar prestamo: " + e.getMessage());
-            return false;
+            throw new ServiceException("Error al eliminar prestamo: " + e.getMessage());
         }
     }
 
@@ -138,22 +132,19 @@ public class DAOPrestamo {
      *
      * @param rs The ResultSet from a query.
      * @return A DTOPrestamo object representing the loan.
+     * @throws ServiceException if there is an error during the conversion.
      */
-    private DTOPrestamo getPrestamo(ResultSet rs) {
-        DTOPrestamo prestamo = null;
+    private DTOPrestamo getPrestamo(ResultSet rs) throws ServiceException {
         try {
-            // get data from query result
             Date fechaInicio = rs.getDate("fechaInicio");
             Date fechaFin = rs.getDate("fechaFin");
             int usuarioId = rs.getInt("usuarioId");
             int libroId = rs.getInt("libroId");
-
-            // create a new DTOPrestamo object with the retrieved data
-            prestamo = new DTOPrestamo(fechaInicio, fechaFin, usuarioId, libroId);
+            DTOPrestamo prestamo = new DTOPrestamo(fechaInicio, fechaFin, usuarioId, libroId);
             prestamo.setId(rs.getInt("id")); // Assign the ID from the database
+            return prestamo;
         } catch (SQLException e) {
-            System.err.println("Error al leer ResultSet: " + e.getMessage());
+            throw new ServiceException("Error al leer ResultSet: " + e.getMessage());
         }
-        return prestamo;
     }
 }

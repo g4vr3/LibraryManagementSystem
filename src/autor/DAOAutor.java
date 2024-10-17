@@ -1,14 +1,14 @@
 package autor;
 
+import exception.ServiceException;
 import jdbc.DDL;
-
 import java.sql.*;
 import java.util.ArrayList;
 
 /**
  * The DAOAutor class handles CRUD operations for the Autor (Author) entity.
  *
- * @version 1.0.1
+ * @version 1.1
  */
 public class DAOAutor {
     private static final String CREATE = "INSERT INTO Autor (nombre) VALUES (?)";
@@ -16,7 +16,6 @@ public class DAOAutor {
     private static final String READ_ALL = "SELECT * FROM Autor";
     private static final String UPDATE = "UPDATE Autor SET nombre = ? WHERE ID = ?";
     private static final String DELETE = "DELETE FROM Autor WHERE ID = ?";
-
     private static Connection conexion;
 
     /**
@@ -30,24 +29,19 @@ public class DAOAutor {
      * Creates a new author in the database.
      *
      * @param autor The author object containing the name of the author.
-     * @return true if the author was successfully created, false otherwise.
+     * @throws ServiceException if there is an error during the creation.
      */
-    public boolean create(DTOAutor autor) {
+    public void create(DTOAutor autor) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(CREATE, Statement.RETURN_GENERATED_KEYS)) {
             pst.setString(1, autor.getNombre());
-            boolean successful = pst.executeUpdate() > 0; // true if successfully created
-
-            if (successful) {
-                try (ResultSet rs = pst.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        autor.setId(rs.getInt(1)); // Set the generated ID
-                    }
+            pst.executeUpdate();
+            try (ResultSet rs = pst.getGeneratedKeys()) {
+                if (rs.next()) {
+                    autor.setId(rs.getInt(1)); // Set the generated ID
                 }
             }
-            return successful;
         } catch (SQLException e) {
-            System.err.println("Error al crear autor: " + e.getMessage());
-            return false;
+            throw new ServiceException("Error al crear autor: " + e.getMessage());
         }
     }
 
@@ -56,27 +50,29 @@ public class DAOAutor {
      *
      * @param id The ID of the author to read.
      * @return A DTOAutor object containing the author's information, or null if not found.
+     * @throws ServiceException if there is an error during the read.
      */
-    public DTOAutor read(int id) {
-        DTOAutor autor = null;
+    public DTOAutor read(int id) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(READ)) {
             pst.setInt(1, id);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                autor = getAutor(rs); // Convert the result to a DTOAutor
+                return getAutor(rs); // Convert the result to a DTOAutor
+            } else {
+                return null;
             }
         } catch (SQLException e) {
-            System.err.println("Error al leer autor: " + e.getMessage());
+            throw new ServiceException("Error al leer autor: " + e.getMessage());
         }
-        return autor;
     }
 
     /**
      * Reads all authors from the database.
      *
      * @return An ArrayList of DTOAutor objects representing all authors in the database.
+     * @throws ServiceException if there is an error during the read.
      */
-    public ArrayList<DTOAutor> readAll() {
+    public ArrayList<DTOAutor> readAll() throws ServiceException {
         ArrayList<DTOAutor> autores = new ArrayList<>();
         try (Statement st = conexion.createStatement();
              ResultSet rs = st.executeQuery(READ_ALL)) {
@@ -84,7 +80,7 @@ public class DAOAutor {
                 autores.add(getAutor(rs)); // Convert each result to a DTOAutor
             }
         } catch (SQLException e) {
-            System.err.println("Error al leer todos los autores: " + e.getMessage());
+            throw new ServiceException("Error al leer todos los autores: " + e.getMessage());
         }
         return autores;
     }
@@ -93,21 +89,16 @@ public class DAOAutor {
      * Updates an existing author's information in the database.
      *
      * @param autor The DTOAutor object containing the updated author information.
-     * @return true if the update was successful, false otherwise.
      * @throws IllegalArgumentException if the author's ID is invalid (less than or equal to 0).
+     * @throws ServiceException if there is an error during the update.
      */
-    public boolean update(DTOAutor autor) {
-        if (autor.getId() <= 0) {
-            throw new IllegalArgumentException("ID de autor no válido");
-        }
-
+    public void update(DTOAutor autor) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(UPDATE)) {
             pst.setString(1, autor.getNombre());
             pst.setInt(2, autor.getId());
-            return pst.executeUpdate() > 0; // true if updated successfully
+            pst.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error al actualizar autor: " + e.getMessage());
-            return false;
+            throw new ServiceException("Error al actualizar autor: " + e.getMessage());
         }
     }
 
@@ -115,20 +106,18 @@ public class DAOAutor {
      * Deletes an author from the database.
      *
      * @param autor The DTOAutor object containing the author's ID to delete.
-     * @return true if the deletion was successful, false otherwise.
      * @throws IllegalArgumentException if the author's ID is invalid (less than or equal to 0).
+     * @throws ServiceException if there is an error during the deletion.
      */
-    public boolean delete(DTOAutor autor) {
+    public void delete(DTOAutor autor) throws ServiceException {
         if (autor.getId() <= 0) {
             throw new IllegalArgumentException("ID de autor no válido");
         }
-
         try (PreparedStatement pst = conexion.prepareStatement(DELETE)) {
             pst.setInt(1, autor.getId());
-            return pst.executeUpdate() > 0; // true if deleted successfully
+            pst.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error al eliminar autor: " + e.getMessage());
-            return false;
+            throw new ServiceException("Error al eliminar autor: " + e.getMessage());
         }
     }
 
@@ -137,16 +126,16 @@ public class DAOAutor {
      *
      * @param rs The ResultSet from a query.
      * @return A DTOAutor object representing the author.
+     * @throws ServiceException if there is an error during the conversion.
      */
-    private DTOAutor getAutor(ResultSet rs) {
-        DTOAutor autor = null;
+    private DTOAutor getAutor(ResultSet rs) throws ServiceException {
         try {
             String nombre = rs.getString("nombre");
-            autor = new DTOAutor(nombre);
+            DTOAutor autor = new DTOAutor(nombre);
             autor.setId(rs.getInt("id")); // Assign the ID from the database
+            return autor;
         } catch (SQLException e) {
-            System.err.println("Error al leer ResultSet: " + e.getMessage());
+            throw new ServiceException("Error al leer ResultSet: " + e.getMessage());
         }
-        return autor;
     }
 }
