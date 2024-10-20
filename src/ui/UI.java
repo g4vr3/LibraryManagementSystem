@@ -7,13 +7,12 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class UI extends JFrame {
-    private CardLayout cardLayout;
-    private JPanel contentPane;
+    private final CardLayout cardLayout;
+    private final JPanel contentPane;
     private JLabel operationLabel;
     private JPanel fieldsPanel;
     private JButton confirmButton;
-    private JTextField idField, titleField, isbnField, nameField, libroIdField, autorIdField;
-    private JLabel idLabel, titleLabel, isbnLabel, nameLabel, libroIdLabel, autorIdLabel;
+    private JLabel autorIdLabel;
 
     public UI() {
         setTitle("Gestión de Biblioteca");
@@ -125,28 +124,28 @@ public class UI extends JFrame {
     private void showCrudForm(String action, String entity) {
         fieldsPanel.removeAll(); // Limpiamos el panel para agregar los nuevos campos
 
-        idLabel = new JLabel("ID:", SwingConstants.LEFT);
-        idField = new JTextField();
+        JLabel idLabel = new JLabel("ID:", SwingConstants.LEFT);
+        JTextField idField = new JTextField();
         idField.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        titleLabel = new JLabel("Título:", SwingConstants.LEFT);
-        titleField = new JTextField();
+        JLabel titleLabel = new JLabel("Título:", SwingConstants.LEFT);
+        JTextField titleField = new JTextField();
         titleField.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        isbnLabel = new JLabel("ISBN:", SwingConstants.LEFT);
-        isbnField = new JTextField();
+        JLabel isbnLabel = new JLabel("ISBN:", SwingConstants.LEFT);
+        JTextField isbnField = new JTextField();
         isbnField.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        nameLabel = new JLabel("Nombre:", SwingConstants.LEFT);
-        nameField = new JTextField();
+        JLabel nameLabel = new JLabel("Nombre:", SwingConstants.LEFT);
+        JTextField nameField = new JTextField();
         nameField.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        libroIdLabel = new JLabel("ID Libro:", SwingConstants.LEFT);
-        libroIdField = new JTextField();
+        JLabel libroIdLabel = new JLabel("ID Libro:", SwingConstants.LEFT);
+        JTextField libroIdField = new JTextField();
         libroIdField.setHorizontalAlignment(SwingConstants.RIGHT);
 
         autorIdLabel = new JLabel("ID Autor:", SwingConstants.LEFT);
-        autorIdField = new JTextField();
+        JTextField autorIdField = new JTextField();
         autorIdField.setHorizontalAlignment(SwingConstants.RIGHT);
 
         switch (entity) {
