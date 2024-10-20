@@ -1,8 +1,6 @@
 package ui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -12,7 +10,6 @@ public class UI extends JFrame {
     private JLabel operationLabel;
     private JPanel fieldsPanel;
     private JButton confirmButton;
-    private JLabel autorIdLabel;
 
     public UI() {
         setTitle("Gestión de Biblioteca");
@@ -50,11 +47,7 @@ public class UI extends JFrame {
     private void addMenuButton(JPanel mainMenuPane, String title, String panelName) {
         JButton button = new JButton(title);
         button.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(contentPane, panelName);
-            }
-        });
+        button.addActionListener(e -> cardLayout.show(contentPane, panelName));
         mainMenuPane.add(button);
     }
 
@@ -67,11 +60,7 @@ public class UI extends JFrame {
         panel.add(centerPanel, BorderLayout.CENTER);
         JButton backButton = new JButton("Volver al Menú Principal");
         backButton.setPreferredSize(new Dimension(200, 40));
-        backButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(contentPane, "mainPanel");
-            }
-        });
+        backButton.addActionListener(e -> cardLayout.show(contentPane, "mainPanel"));
         panel.add(backButton, BorderLayout.SOUTH);
         return panel;
     }
@@ -84,11 +73,7 @@ public class UI extends JFrame {
         for (String action : actions) {
             JButton button = new JButton(action + " " + entity);
             button.setPreferredSize(new Dimension(120, 30));
-            button.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    showCrudForm(action, entity);
-                }
-            });
+            button.addActionListener(e -> showCrudForm(action, entity));
             crudToolbar.add(button);
         }
         return crudToolbar;
@@ -110,11 +95,9 @@ public class UI extends JFrame {
         confirmButton = new JButton("Confirmar");
         confirmButton.setVisible(false);
         confirmButton.setPreferredSize(new Dimension(120, 40));
-        confirmButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // CRUD logic here
-                JOptionPane.showMessageDialog(null, operationLabel.getText() + " completado!");
-            }
+        confirmButton.addActionListener(e -> {
+            // CRUD logic here
+            JOptionPane.showMessageDialog(null, operationLabel.getText() + " completado!");
         });
         centerPanel.add(confirmButton, BorderLayout.SOUTH);
 
@@ -144,7 +127,7 @@ public class UI extends JFrame {
         JTextField libroIdField = new JTextField();
         libroIdField.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        autorIdLabel = new JLabel("ID Autor:", SwingConstants.LEFT);
+        JLabel autorIdLabel = new JLabel("ID Autor:", SwingConstants.LEFT);
         JTextField autorIdField = new JTextField();
         autorIdField.setHorizontalAlignment(SwingConstants.RIGHT);
 
@@ -162,7 +145,7 @@ public class UI extends JFrame {
                     fieldsPanel.add(isbnField);
                 }
                 break;
-            case "Autor":
+            case "Autor", "Usuario":
                 if (action.equals("Buscar") || action.equals("Eliminar")) {
                     fieldsPanel.setLayout(new GridLayout(2, 1, 10, 10));
                     fieldsPanel.add(idLabel);
@@ -173,31 +156,7 @@ public class UI extends JFrame {
                     fieldsPanel.add(nameField);
                 }
                 break;
-            case "Usuario":
-                if (action.equals("Buscar") || action.equals("Eliminar")) {
-                    fieldsPanel.setLayout(new GridLayout(2, 1, 10, 10));
-                    fieldsPanel.add(idLabel);
-                    fieldsPanel.add(idField);
-                } else if (action.equals("Crear") || action.equals("Actualizar")) {
-                    fieldsPanel.setLayout(new GridLayout(2, 1, 10, 10));
-                    fieldsPanel.add(nameLabel);
-                    fieldsPanel.add(nameField);
-                }
-                break;
-            case "Prestamo":
-                if (action.equals("Buscar") || action.equals("Eliminar")) {
-                    fieldsPanel.setLayout(new GridLayout(2, 1, 10, 10));
-                    fieldsPanel.add(idLabel);
-                    fieldsPanel.add(idField);
-                } else if (action.equals("Crear") || action.equals("Actualizar")) {
-                    fieldsPanel.setLayout(new GridLayout(2, 2, 10, 10));
-                    fieldsPanel.add(libroIdLabel);
-                    fieldsPanel.add(libroIdField);
-                    fieldsPanel.add(autorIdLabel);
-                    fieldsPanel.add(autorIdField);
-                }
-                break;
-            case "Libro_Autor":
+            case "Prestamo", "Libro_Autor":
                 if (action.equals("Buscar") || action.equals("Eliminar")) {
                     fieldsPanel.setLayout(new GridLayout(2, 1, 10, 10));
                     fieldsPanel.add(idLabel);
