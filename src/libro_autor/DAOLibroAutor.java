@@ -12,10 +12,10 @@ import java.util.ArrayList;
  * @version 1.1
  */
 public class DAOLibroAutor {
-    private static final String CREATE = "INSERT INTO LibroAutor (libroId, autorId) VALUES (?, ?)";
-    private static final String READ_BY_LIBRO = "SELECT * FROM LibroAutor WHERE libroId = ?";
-    private static final String READ_BY_AUTOR = "SELECT * FROM LibroAutor WHERE autorId = ?";
-    private static final String READ_ALL = "SELECT * FROM LibroAutor";
+    private static final String CREATE = "INSERT INTO Libro_Autor (libroId, autorId) VALUES (?, ?)";
+    private static final String READ_BY_LIBRO = "SELECT * FROM Libro_Autor WHERE libroId = ?";
+    private static final String READ_BY_AUTOR = "SELECT * FROM Libro_Autor WHERE autorId = ?";
+    private static final String READ_ALL = "SELECT * FROM Libro_Autor";
     private static Connection conexion;
 
     /**

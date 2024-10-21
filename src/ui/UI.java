@@ -1,6 +1,14 @@
 package ui;
 
+import autor.AutorService;
+import exception.ServiceException;
+import libro.LibroService;
+import libro_autor.LibroAutorService;
+import prestamo.PrestamoService;
+import usuario.UsuarioService;
+
 import java.awt.*;
+import java.util.HashMap;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -8,14 +16,28 @@ public class UI extends JFrame {
 
     private final CardLayout cardLayout;
     private final JPanel contentPane;
-    private JLabel menuTitleLabel;  // Etiqueta para mostrar la operación seleccionada
-    private JPanel fieldsPanel;     // Panel que contendrá los campos de formulario
-    private JButton confirmButton;  // Botón para confirmar la operación
-    private JToolBar crudToolbar;   // Cambiamos JPanel por JToolBar
-    private String currentEntity;   // Entidad seleccionada
-    private String currentAction;   // Acción CRUD seleccionada
+    private JLabel operationLabel;
+    private JPanel fieldsPanel;
+    private JButton confirmButton;
+    private JToolBar crudToolbar;
+    private String currentEntity;
+    private String currentAction;
+
+    // Mapa para almacenar los campos por nombre
+    private HashMap<String, JTextField> inputFields;
+
+    // Service integration
+    private LibroService libroService;
+    private AutorService autorService;
+    private UsuarioService usuarioService;
+    private PrestamoService prestamoService;
+    private LibroAutorService libroAutorService;
 
     public UI() {
+        // Inicializar el HashMap para almacenar los campos de entrada
+        inputFields = new HashMap<>();
+
+        // Frame settings
         setTitle("Gestión de Biblioteca");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 450);
@@ -25,10 +47,10 @@ public class UI extends JFrame {
         contentPane = new JPanel(cardLayout);
         setContentPane(contentPane);
 
-        // Crear el panel principal (menú)
+        // Main panel creation
         contentPane.add(getMainMenuPanel(), "mainPanel");
 
-        // Panel de gestión reutilizable para CRUD
+        // Management panel creation (CRUD)
         contentPane.add(getManagementPanel(), "managementPanel");
 
         cardLayout.show(contentPane, "mainPanel");
@@ -39,18 +61,18 @@ public class UI extends JFrame {
         mainMenuPane.setBorder(new EmptyBorder(50, 200, 50, 200));
         mainMenuPane.setBackground(Color.WHITE);  // Fondo blanco
 
-        // Etiqueta de título de menú
-        menuTitleLabel = new JLabel("Gestión Bibliotecaria", SwingConstants.CENTER);
-        menuTitleLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
-        mainMenuPane.add(menuTitleLabel);
+        // Operation dynamic label
+        operationLabel = new JLabel("Gestión Bibliotecaria", SwingConstants.CENTER);
+        operationLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
+        mainMenuPane.add(operationLabel);
 
-        // Etiqueta de info de menú
-        menuTitleLabel = new JLabel("Selecciona una opción para gestionar", SwingConstants.CENTER);
-        menuTitleLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        mainMenuPane.add(menuTitleLabel);
+        // Main menu information label
+        JLabel menuInfoLabel = new JLabel("Selecciona una opción para su gestión", SwingConstants.CENTER);
+        menuInfoLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        mainMenuPane.add(menuInfoLabel);
 
-        // Añadir los botones para cada entidad
-        String[] entities = {"LIBROS", "AUTORES", "USUARIOS", "PRESTAMOS", "LIBRO_AUTOR"};
+        // Entity management buttons
+        String[] entities = {"LIBRO", "AUTOR", "USUARIO", "PRÉSTAMO", "LIBRO_AUTOR"};
         for (String entity : entities) {
             JButton button = new JButton(entity);
             button.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -67,94 +89,95 @@ public class UI extends JFrame {
 
     private JPanel getManagementPanel() {
         JPanel managementPanel = new JPanel();
-        managementPanel.setLayout(new BorderLayout(10, 10)); // Uso de BorderLayout para separar las secciones
-        managementPanel.setBackground(Color.WHITE);  // Fondo blanco
+        managementPanel.setLayout(new BorderLayout(10, 10));
+        managementPanel.setBackground(Color.WHITE);
 
-        // Barra de herramientas CRUD (dinámica) - parte superior
+        // CRUD toolbar (dynamic)
         crudToolbar = new JToolBar();
-        crudToolbar.setFloatable(false); // Deshabilitar que la barra sea movible
-        crudToolbar.setLayout(new FlowLayout(FlowLayout.CENTER));  // Centrar los botones
-        crudToolbar.setBackground(new Color(240, 240, 240));  // Fondo blanco
+        crudToolbar.setFloatable(false);
+        crudToolbar.setLayout(new FlowLayout(FlowLayout.CENTER));
+        crudToolbar.setBackground(new Color(240, 240, 240));
         managementPanel.add(crudToolbar, BorderLayout.NORTH);
 
-        // Panel central que contendrá la etiqueta de operación, el formulario y el botón de confirmación
+        // Center panel (contains operation label, crud form and confirm button)
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout(10, 10));
         centerPanel.setBorder(new EmptyBorder(50, 170, 50, 170));
         centerPanel.setBackground(Color.WHITE);  // Fondo blanco
 
-        // Etiqueta de operación seleccionada
-        menuTitleLabel = new JLabel("Selecciona una operación", SwingConstants.CENTER);
-        menuTitleLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
-        centerPanel.add(menuTitleLabel, BorderLayout.NORTH);
+        // Dynamic operation label
+        operationLabel = new JLabel("Selecciona una operación", SwingConstants.CENTER);
+        operationLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
+        centerPanel.add(operationLabel, BorderLayout.NORTH);
 
-        // Panel para los campos dinámicos del formulario
+        // Dynamic CRUD form panel
         fieldsPanel = new JPanel();
         fieldsPanel.setLayout(new GridLayout(0, 2, 10, 10));
-        fieldsPanel.setBackground(Color.WHITE);  // Fondo blanco
+        fieldsPanel.setBackground(Color.WHITE);
         centerPanel.add(fieldsPanel, BorderLayout.CENTER);
 
-        // Botón de confirmación
-        confirmButton = new JButton("Confirmar");
-        confirmButton.setVisible(false); // Ocultamos el botón inicialmente
-        confirmButton.addActionListener(e -> confirmCrudAction());
-        confirmButton.setPreferredSize(new Dimension(200, 50)); // Tamaño adecuado
-
-        // Estilos de botón
-        confirmButton.setFont(new Font("Tahoma", Font.PLAIN, 14));  // Fuente más simple
-        confirmButton.setFocusPainted(false);  // Sin foco visible
-        confirmButton.setBorderPainted(false);  // Sin borde
-        confirmButton.setBackground(new Color(240, 240, 240));  // Gris claro de fondo
-        confirmButton.setForeground(new Color(108, 108, 108));  // Gris oscuro para el texto
-        confirmButton.setCursor(new Cursor(Cursor.HAND_CURSOR));  // Cursor tipo mano al pasar por encima
-
+        // Confirm button
+        confirmButton = getConfirmButton();
         centerPanel.add(confirmButton, BorderLayout.SOUTH);
 
-        // Añadir panel central al centro del panel principal
+        // Center panel on the main panel center
         managementPanel.add(centerPanel, BorderLayout.CENTER);
 
-        // Botón de "Volver al Menú Principal"
-        JButton backButton = getBackButton();
-        managementPanel.add(backButton, BorderLayout.SOUTH);
+        // Home Button
+        JButton homeButton = getHomeButton();
+        managementPanel.add(homeButton, BorderLayout.SOUTH);
 
         return managementPanel;
     }
 
-    private JButton getBackButton() {
-        JButton backButton = new JButton("Volver al Menú Principal");
-        backButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        backButton.setFocusPainted(false);
-        backButton.setBorderPainted(false);
-        backButton.setBackground(new Color(255, 255, 255));  // Fondo gris claro
-        backButton.setForeground(new Color(108, 108, 108));  // Texto gris oscuro
-        backButton.addActionListener(e -> {
-            resetManagementPanel(); // Limpiar el formulario y restablecer la etiqueta al volver
-            cardLayout.show(contentPane, "mainPanel"); // Mostrar el menú principal
-        });
-        return backButton;
+    private JButton getConfirmButton() {
+        confirmButton = new JButton("Confirmar");
+        confirmButton.setVisible(false); // hidden at start
+        confirmButton.addActionListener(e -> doCrudAction());
+        confirmButton.setPreferredSize(new Dimension(200, 50));
+        // Button style
+        confirmButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        confirmButton.setFocusPainted(false);
+        confirmButton.setBorderPainted(false);
+        confirmButton.setBackground(new Color(240, 240, 240));
+        confirmButton.setForeground(new Color(108, 108, 108));
+        confirmButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return confirmButton;
     }
 
-    // Este método maneja tanto la generación del panel como la visualización del mismo
+    private JButton getHomeButton() {
+        JButton homeButton = new JButton("Volver al Menú Principal");
+        homeButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        homeButton.setFocusPainted(false);
+        homeButton.setBorderPainted(false);
+        homeButton.setBackground(new Color(255, 255, 255));
+        homeButton.setForeground(new Color(108, 108, 108));
+        homeButton.addActionListener(e -> {
+            resetManagementPanel();
+            cardLayout.show(contentPane, "mainPanel"); // Show main menu
+        });
+        return homeButton;
+    }
+
     private void showManagementPanel(String entity) {
         currentEntity = entity;
-        resetManagementPanel();  // Limpiar el panel y restablecer la etiqueta
-        updateCrudToolbar();  // Actualizamos la barra de botones CRUD según la entidad seleccionada
+        resetManagementPanel();
+        updateCrudToolbar();
         cardLayout.show(contentPane, "managementPanel");
     }
 
-    // Actualizar la barra de herramientas CRUD dinámicamente según la entidad
     private void updateCrudToolbar() {
-        crudToolbar.removeAll(); // Limpiar los botones anteriores
+        crudToolbar.removeAll(); // Clear panel
 
-        // Definir acciones disponibles para cada entidad
+        // Operation definitions for each entity
         String[] actions;
         switch (currentEntity) {
-            case "PRESTAMOS" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Usuario"};
+            case "PRÉSTAMO" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Usuario"};
             case "LIBRO_AUTOR" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Autor"};
             default -> actions = new String[]{"Crear", "Buscar", "Actualizar", "Eliminar"};
         }
 
-        // Añadir botones para las acciones
+        // Operation Buttons definitions
         for (String action : actions) {
             JButton button = new JButton(action);
             button.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -168,57 +191,195 @@ public class UI extends JFrame {
 
         crudToolbar.revalidate();
         crudToolbar.repaint();
-        menuTitleLabel.setText("Selecciona una operación para " + currentEntity);
-        confirmButton.setVisible(false); // Ocultar el botón hasta que se seleccione una acción
+        operationLabel.setText("Selecciona una operación para " + currentEntity.toLowerCase());
     }
 
-    // Mostrar el formulario CRUD según la acción seleccionada
     private void showCrudForm(String action) {
         currentAction = action;
-        fieldsPanel.removeAll();  // Limpiamos el fieldsPanel cuando se selecciona una nueva operación
+        fieldsPanel.removeAll();  // Clear panel
+        inputFields.clear(); // Limpiar los campos previos
 
-        menuTitleLabel.setText(action + " " + currentEntity);  // Actualizamos la etiqueta de operación
+        operationLabel.setText(action + " (" + currentEntity.toLowerCase() + ")");  // Operation label update
 
-        // Añadir campos dinámicos según la entidad y la acción
+        // Dynamic fields for current entity
         if (action.startsWith("Buscar") || action.equals("Eliminar")) {
             fieldsPanel.setBorder(new EmptyBorder(45, 0, 45, 0));
             addField("ID");
-        } else if (currentEntity.equals("LIBROS")) {
+        } else if (currentEntity.equals("LIBRO")) {
             fieldsPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
             addField("Título");
             addField("ISBN");
-        } else if (currentEntity.equals("AUTORES") || currentEntity.equals("USUARIOS")) {
+        } else if (currentEntity.equals("AUTOR") || currentEntity.equals("USUARIO")) {
             fieldsPanel.setBorder(new EmptyBorder(45, 0, 45, 0));
             addField("Nombre");
-        } else if (currentEntity.equals("PRESTAMOS") || currentEntity.equals("LIBRO_AUTOR")) {
+        } else if (currentEntity.equals("PRÉSTAMO")) {
+            fieldsPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
+            addField("ID Libro");
+            addField("ID Usuario");
+        } else if (currentEntity.equals("LIBRO_AUTOR")) {
             fieldsPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
             addField("ID Libro");
             addField("ID Autor");
         }
 
-        confirmButton.setVisible(true);  // Mostrar el botón de confirmación una vez seleccionada una acción
+        confirmButton.setVisible(true);
         fieldsPanel.revalidate();
         fieldsPanel.repaint();
     }
 
-    // Método auxiliar para agregar campos de texto dinámicos
     private void addField(String labelText) {
         JLabel label = new JLabel(labelText, SwingConstants.LEFT);
         JTextField field = new JTextField();
+        inputFields.put(labelText, field); // Almacena el campo en el mapa
         fieldsPanel.add(label);
         fieldsPanel.add(field);
     }
 
-    // Confirmar la operación CRUD
-    private void confirmCrudAction() {
-        JOptionPane.showMessageDialog(this, currentAction + " de " + currentEntity + " completado!");
-    }
-
-    // Método para limpiar el fieldsPanel y restablecer la etiqueta de operación
     private void resetManagementPanel() {
-        fieldsPanel.removeAll();          // Limpiar los campos anteriores
-        confirmButton.setVisible(false);  // Ocultar el botón de confirmación hasta que se seleccione una operación
+        fieldsPanel.removeAll();          // Clear panel
+        confirmButton.setVisible(false);  // Hide confirm button
+        inputFields.clear();              // Clear input fields
         fieldsPanel.revalidate();
         fieldsPanel.repaint();
     }
+
+    private void doCrudAction() {
+        switch (currentEntity) {
+            case "LIBRO":
+                try {
+                    libroService = new LibroService(new LibroAutorService());
+                    JOptionPane.showMessageDialog(this, currentAction + " " + currentEntity + " completado!");
+                } catch (ServiceException e) {
+                    JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                switch (currentAction) {
+                    case "Crear":
+                        // check the fields are completed
+                        if (!areFieldsFilled("Título", "ISBN")) {
+                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            return;  // stop
+                        }
+                        String title = inputFields.get("Título").getText();
+                        String isbn = inputFields.get("ISBN").getText();
+                        try {
+                            libroService.createLibro(title, isbn);
+                        } catch (ServiceException e) {
+                            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        break;
+
+                    case "Buscar":
+                        String id = inputFields.get("ID").getText();
+                        break;
+
+                    case "Actualizar":
+                        break;
+
+                    case "Eliminar":
+                        id = inputFields.get("ID").getText();
+                        break;
+                }
+                break;
+
+            case "AUTOR":
+                switch (currentAction) {
+                    case "Crear":
+                        if (!areFieldsFilled("Nombre")) {
+                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+                        String nombre = inputFields.get("Nombre").getText();
+                        break;
+
+                    case "Buscar":
+                        String id = inputFields.get("ID").getText();
+                        break;
+
+                    case "Actualizar":
+                        break;
+
+                    case "Eliminar":
+                        id = inputFields.get("ID").getText();
+                        break;
+                }
+                break;
+
+            case "USUARIO":
+                switch (currentAction) {
+                    case "Crear":
+                        if (!areFieldsFilled("Nombre")) {
+                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+                        String nombre = inputFields.get("Nombre").getText();
+                        break;
+
+                    case "Buscar":
+                        String id = inputFields.get("ID").getText();
+                        break;
+
+                    case "Actualizar":
+                        break;
+
+                    case "Eliminar":
+                        id = inputFields.get("ID").getText();
+                        break;
+                }
+                break;
+
+            case "PRÉSTAMO":
+                switch (currentAction) {
+                    case "Crear":
+                        if (!areFieldsFilled("ID Libro", "ID Usuario")) {
+                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+                        String libroId = inputFields.get("ID Libro").getText();
+                        String usuarioId = inputFields.get("ID Usuario").getText();
+                        break;
+
+                    case "Buscar por Libro":
+                        libroId = inputFields.get("ID Libro").getText();
+                        break;
+
+                    case "Buscar por Usuario":
+                        usuarioId = inputFields.get("ID Usuario").getText();
+                        break;
+                }
+                break;
+
+            case "LIBRO_AUTOR":
+                switch (currentAction) {
+                    case "Crear":
+                        if (!areFieldsFilled("ID Libro", "ID Autor")) {
+                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+                        String libroId = inputFields.get("ID Libro").getText();
+                        String autorId = inputFields.get("ID Autor").getText();
+                        break;
+
+                    case "Buscar por Libro":
+                        libroId = inputFields.get("ID Libro").getText();
+                        break;
+
+                    case "Buscar por Autor":
+                        autorId = inputFields.get("ID Autor").getText();
+                        break;
+                }
+                break;
+        }
+    }
+
+    private boolean areFieldsFilled(String... fieldKeys) {
+        for (String key : fieldKeys) {
+            JTextField field = inputFields.get(key);
+            if (field == null || field.getText().trim().isEmpty()) {
+                return false;  // one field is uncompleted at least
+            }
+        }
+        return true;  // all the fields are completed
+    }
+
+
 }
