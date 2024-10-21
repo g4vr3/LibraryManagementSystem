@@ -28,14 +28,13 @@ public class DAOLibroAutor {
     /**
      * Creates a new book-author relationship in the database.
      *
-     * @param libroId The ID of the book.
-     * @param autorId The ID of the author.
+     * @param libroAutor The DTOLibroAutor object containing book and author id.
      * @throws ServiceException if there is an error during creation.
      */
-    public void create(int libroId, int autorId) throws ServiceException {
+        public void create(DTOLibroAutor libroAutor) throws ServiceException {
         try (PreparedStatement pst = conexion.prepareStatement(CREATE)) {
-            pst.setInt(1, libroId);
-            pst.setInt(2, autorId);
+            pst.setInt(1, libroAutor.getLibroId());
+            pst.setInt(2, libroAutor.getAutorId());
             pst.executeUpdate();
         } catch (SQLException e) {
             throw new ServiceException("Error al crear relación libro-autor: " + e.getMessage());
