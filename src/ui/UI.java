@@ -147,9 +147,12 @@ public class UI extends JFrame {
         crudToolbar.removeAll(); // Limpiar los botones anteriores
 
         // Definir acciones disponibles para cada entidad
-        String[] actions = currentEntity.equals("PRESTAMOS") || currentEntity.equals("LIBRO_AUTOR")
-                ? new String[]{"Crear", "Buscar"}
-                : new String[]{"Crear", "Buscar", "Actualizar", "Eliminar"};
+        String[] actions;
+        switch (currentEntity) {
+            case "PRESTAMOS" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Usuario"};
+            case "LIBRO_AUTOR" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Autor"};
+            default -> actions = new String[]{"Crear", "Buscar", "Actualizar", "Eliminar"};
+        }
 
         // Añadir botones para las acciones
         for (String action : actions) {
@@ -177,7 +180,7 @@ public class UI extends JFrame {
         menuTitleLabel.setText(action + " " + currentEntity);  // Actualizamos la etiqueta de operación
 
         // Añadir campos dinámicos según la entidad y la acción
-        if (action.equals("Buscar") || action.equals("Eliminar")) {
+        if (action.startsWith("Buscar") || action.equals("Eliminar")) {
             fieldsPanel.setBorder(new EmptyBorder(45, 0, 45, 0));
             addField("ID");
         } else if (currentEntity.equals("LIBROS")) {
