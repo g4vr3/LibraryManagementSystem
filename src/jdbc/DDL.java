@@ -24,25 +24,27 @@ public class DDL {
     static final String SQL_SCRIPT_PATH = "resources/sql/Biblioteca.sql";
 
     // Database connection
-    static Connection conexion;
+    static Connection conn;
 
     // Private constructor to handle database setup
     private DDL() {
         try {
             Class.forName("org.mariadb.jdbc.Driver"); // Load MariaDB driver
-            conexion = DriverManager.getConnection(URL, USER, PASS); // Connect without specifying a database
+            conn = DriverManager.getConnection(URL, USER, PASS); // Connect without specifying a database
 
-            // Check if the database exists, if not, create it
+            // Check if the database exists
             if (!databaseExists()) {
                 System.out.println("La base de datos no existe. Creando base de datos...");
-                createDatabase();
+                createDatabase();  // Create the database
                 System.out.println("Base de datos creada.");
+
+                // Execute the SQL script to set up the database schema and insert initial data
+                executeSQLScript();
             }
 
             // Use the specified database
-            Statement st = conexion.createStatement();
+            Statement st = conn.createStatement();
             st.execute("USE " + DB);
-            executeSQLScript(SQL_SCRIPT_PATH);
         } catch (ClassNotFoundException e) {
             System.err.println("Error: Driver de base de datos no encontrado.");
             e.printStackTrace();
@@ -62,7 +64,7 @@ public class DDL {
      */
     private void createDatabase() throws SQLException {
         String createDbQuery = "CREATE DATABASE " + DB;
-        Statement stmt = conexion.createStatement();
+        Statement stmt = conn.createStatement();
         stmt.execute(createDbQuery);
     }
 
@@ -74,7 +76,7 @@ public class DDL {
      */
     private boolean databaseExists() throws SQLException {
         String checkDbQuery = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?";
-        PreparedStatement checkDbStmt = conexion.prepareStatement(checkDbQuery);
+        PreparedStatement checkDbStmt = conn.prepareStatement(checkDbQuery);
         checkDbStmt.setString(1, DB);
         ResultSet rs = checkDbStmt.executeQuery();
         return rs.next(); // Returns true if the database exists
@@ -83,28 +85,30 @@ public class DDL {
     /**
      * Execute the SQL script to create the database and its tables.
      *
-     * @param filePath the path to the SQL script file
      * @throws IOException  if an I/O error occurs while reading the file
      * @throws SQLException if an SQL error occurs while executing the script
      */
-    private void executeSQLScript(String filePath) throws IOException, SQLException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath));
-             Statement stmt = conexion.createStatement()) {
+    private void executeSQLScript() throws IOException, SQLException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(DDL.SQL_SCRIPT_PATH));
+             Statement stmt = conn.createStatement()) {
 
             StringBuilder sql = new StringBuilder();
             String line;
-
             while ((line = reader.readLine()) != null) {
-                sql.append(line);
-                // Execute each SQL statement when a semicolon is found
-                if (line.trim().endsWith(";")) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("--") || line.startsWith("/*")) {
+                    // ignore empty lines and comments
+                    continue;
+                }
+                sql.append(line).append(" ");  // add line
+                if (line.endsWith(";")) {
+                    // execute sentence
                     stmt.execute(sql.toString());
-                    sql.setLength(0); // Clear the buffer for the next statement
+                    sql.setLength(0);  // clear buffer
                 }
             }
         } catch (IOException | SQLException e) {
             System.err.println("Error al ejecutar el script SQL: " + e.getMessage());
-            throw e; // Re-throw the exception to handle it externally
         }
     }
 
@@ -114,9 +118,9 @@ public class DDL {
      * @return the connection
      */
     public static Connection getConnection() {
-        if (conexion == null)
+        if (conn == null)
             new DDL(); // If connection is null, initialize the DDL class to set it up
-        return conexion;
+        return conn;
     }
 
     /**
@@ -125,9 +129,9 @@ public class DDL {
      * @throws SQLException if an SQL error occurs during connection closure
      */
     public static void closeConnection() throws SQLException {
-        if (conexion != null) {
-            conexion.close();
-            conexion = null;
+        if (conn != null) {
+            conn.close();
+            conn = null;
         }
     }
 }
