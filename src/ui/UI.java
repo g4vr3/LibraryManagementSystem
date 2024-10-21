@@ -8,13 +8,12 @@ public class UI extends JFrame {
 
     private final CardLayout cardLayout;
     private final JPanel contentPane;
-    private JLabel operationLabel;  // Etiqueta para mostrar la operación seleccionada
+    private JLabel menuTitleLabel;  // Etiqueta para mostrar la operación seleccionada
     private JPanel fieldsPanel;     // Panel que contendrá los campos de formulario
     private JButton confirmButton;  // Botón para confirmar la operación
     private JToolBar crudToolbar;   // Cambiamos JPanel por JToolBar
     private String currentEntity;   // Entidad seleccionada
     private String currentAction;   // Acción CRUD seleccionada
-    private JButton backButton;
 
     public UI() {
         setTitle("Gestión de Biblioteca");
@@ -27,18 +26,28 @@ public class UI extends JFrame {
         setContentPane(contentPane);
 
         // Crear el panel principal (menú)
-        contentPane.add(createMainMenuPane(), "mainPanel");
+        contentPane.add(getMainMenuPanel(), "mainPanel");
 
         // Panel de gestión reutilizable para CRUD
-        contentPane.add(createGestionPanel(), "gestionPanel");
+        contentPane.add(getManagementPanel(), "managementPanel");
 
         cardLayout.show(contentPane, "mainPanel");
     }
 
-    private JPanel createMainMenuPane() {
-        JPanel mainMenuPane = new JPanel(new GridLayout(5, 1, 10, 10));
-        mainMenuPane.setBorder(new EmptyBorder(100, 100, 100, 100));
+    private JPanel getMainMenuPanel() {
+        JPanel mainMenuPane = new JPanel(new GridLayout(7, 1, 10, 10));
+        mainMenuPane.setBorder(new EmptyBorder(50, 200, 50, 200));
         mainMenuPane.setBackground(Color.WHITE);  // Fondo blanco
+
+        // Etiqueta de título de menú
+        menuTitleLabel = new JLabel("Gestión Bibliotecaria", SwingConstants.CENTER);
+        menuTitleLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
+        mainMenuPane.add(menuTitleLabel);
+
+        // Etiqueta de info de menú
+        menuTitleLabel = new JLabel("Selecciona una opción para gestionar", SwingConstants.CENTER);
+        menuTitleLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        mainMenuPane.add(menuTitleLabel);
 
         // Añadir los botones para cada entidad
         String[] entities = {"LIBROS", "AUTORES", "USUARIOS", "PRESTAMOS", "LIBRO_AUTOR"};
@@ -49,35 +58,35 @@ public class UI extends JFrame {
             button.setBorderPainted(false);
             button.setBackground(new Color(240, 240, 240));  // Fondo gris claro
             button.setForeground(new Color(108, 108, 108));  // Texto gris oscuro
-            button.addActionListener(e -> showGestionPanel(entity));  // Usamos un único método para cada entidad
+            button.addActionListener(e -> showManagementPanel(entity));  // Usamos un único método para cada entidad
             mainMenuPane.add(button);
         }
 
         return mainMenuPane;
     }
 
-    private JPanel createGestionPanel() {
-        JPanel gestionPanel = new JPanel();
-        gestionPanel.setLayout(new BorderLayout(10, 10)); // Uso de BorderLayout para separar las secciones
-        gestionPanel.setBackground(Color.WHITE);  // Fondo blanco
+    private JPanel getManagementPanel() {
+        JPanel managementPanel = new JPanel();
+        managementPanel.setLayout(new BorderLayout(10, 10)); // Uso de BorderLayout para separar las secciones
+        managementPanel.setBackground(Color.WHITE);  // Fondo blanco
 
         // Barra de herramientas CRUD (dinámica) - parte superior
         crudToolbar = new JToolBar();
         crudToolbar.setFloatable(false); // Deshabilitar que la barra sea movible
         crudToolbar.setLayout(new FlowLayout(FlowLayout.CENTER));  // Centrar los botones
         crudToolbar.setBackground(new Color(240, 240, 240));  // Fondo blanco
-        gestionPanel.add(crudToolbar, BorderLayout.NORTH);
+        managementPanel.add(crudToolbar, BorderLayout.NORTH);
 
         // Panel central que contendrá la etiqueta de operación, el formulario y el botón de confirmación
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout(10, 10));
-        centerPanel.setBorder(new EmptyBorder(50, 70, 50, 70));
+        centerPanel.setBorder(new EmptyBorder(50, 170, 50, 170));
         centerPanel.setBackground(Color.WHITE);  // Fondo blanco
 
         // Etiqueta de operación seleccionada
-        operationLabel = new JLabel("Selecciona una operación", SwingConstants.CENTER);
-        operationLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
-        centerPanel.add(operationLabel, BorderLayout.NORTH);
+        menuTitleLabel = new JLabel("Selecciona una operación", SwingConstants.CENTER);
+        menuTitleLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
+        centerPanel.add(menuTitleLabel, BorderLayout.NORTH);
 
         // Panel para los campos dinámicos del formulario
         fieldsPanel = new JPanel();
@@ -102,30 +111,35 @@ public class UI extends JFrame {
         centerPanel.add(confirmButton, BorderLayout.SOUTH);
 
         // Añadir panel central al centro del panel principal
-        gestionPanel.add(centerPanel, BorderLayout.CENTER);
+        managementPanel.add(centerPanel, BorderLayout.CENTER);
 
         // Botón de "Volver al Menú Principal"
-        backButton = new JButton("Volver al Menú Principal");
+        JButton backButton = getBackButton();
+        managementPanel.add(backButton, BorderLayout.SOUTH);
+
+        return managementPanel;
+    }
+
+    private JButton getBackButton() {
+        JButton backButton = new JButton("Volver al Menú Principal");
         backButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
         backButton.setFocusPainted(false);
         backButton.setBorderPainted(false);
         backButton.setBackground(new Color(255, 255, 255));  // Fondo gris claro
         backButton.setForeground(new Color(108, 108, 108));  // Texto gris oscuro
         backButton.addActionListener(e -> {
-            resetGestionPanel(); // Limpiar el formulario y restablecer la etiqueta al volver
+            resetManagementPanel(); // Limpiar el formulario y restablecer la etiqueta al volver
             cardLayout.show(contentPane, "mainPanel"); // Mostrar el menú principal
         });
-        gestionPanel.add(backButton, BorderLayout.SOUTH);
-
-        return gestionPanel;
+        return backButton;
     }
 
     // Este método maneja tanto la generación del panel como la visualización del mismo
-    private void showGestionPanel(String entity) {
+    private void showManagementPanel(String entity) {
         currentEntity = entity;
-        resetGestionPanel();  // Limpiar el panel y restablecer la etiqueta
+        resetManagementPanel();  // Limpiar el panel y restablecer la etiqueta
         updateCrudToolbar();  // Actualizamos la barra de botones CRUD según la entidad seleccionada
-        cardLayout.show(contentPane, "gestionPanel");
+        cardLayout.show(contentPane, "managementPanel");
     }
 
     // Actualizar la barra de herramientas CRUD dinámicamente según la entidad
@@ -151,7 +165,7 @@ public class UI extends JFrame {
 
         crudToolbar.revalidate();
         crudToolbar.repaint();
-        operationLabel.setText("Selecciona una operación para " + currentEntity);
+        menuTitleLabel.setText("Selecciona una operación para " + currentEntity);
         confirmButton.setVisible(false); // Ocultar el botón hasta que se seleccione una acción
     }
 
@@ -160,7 +174,7 @@ public class UI extends JFrame {
         currentAction = action;
         fieldsPanel.removeAll();  // Limpiamos el fieldsPanel cuando se selecciona una nueva operación
 
-        operationLabel.setText(action + " " + currentEntity);  // Actualizamos la etiqueta de operación
+        menuTitleLabel.setText(action + " " + currentEntity);  // Actualizamos la etiqueta de operación
 
         // Añadir campos dinámicos según la entidad y la acción
         if (action.equals("Buscar") || action.equals("Eliminar")) {
@@ -198,9 +212,8 @@ public class UI extends JFrame {
     }
 
     // Método para limpiar el fieldsPanel y restablecer la etiqueta de operación
-    private void resetGestionPanel() {
+    private void resetManagementPanel() {
         fieldsPanel.removeAll();          // Limpiar los campos anteriores
-        operationLabel.setText("Selecciona una operación");  // Restablecer el texto de la etiqueta
         confirmButton.setVisible(false);  // Ocultar el botón de confirmación hasta que se seleccione una operación
         fieldsPanel.revalidate();
         fieldsPanel.repaint();
