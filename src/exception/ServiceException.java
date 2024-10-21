@@ -6,7 +6,7 @@ package exception;
  *
  * @version 1.0
  */
-public class ServiceException extends RuntimeException {
+public class ServiceException extends Exception {
 
     /**
      * Instantiates a new ServiceException with a specified message.
