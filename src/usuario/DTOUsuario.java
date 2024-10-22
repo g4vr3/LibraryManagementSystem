@@ -61,9 +61,8 @@ public class DTOUsuario {
      */
     @Override
     public String toString() {
-        return "DTOUsuario{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                '}';
+        return "ID: " + id + "\n" +
+                "Nombre: " + nombre;
     }
+
 }

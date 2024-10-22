@@ -126,12 +126,10 @@ public class DTOPrestamo {
      */
     @Override
     public String toString() {
-        return "DTOPrestamo{" +
-                "id=" + id +
-                ", fechaInicio=" + fechaInicio +
-                ", fechaFin=" + fechaFin +
-                ", usuarioId=" + usuarioId +
-                ", libroId=" + libroId +
-                '}';
+        return "ID: " + id + "\n" +
+                "Fecha de Inicio: " + fechaInicio + "\n" +
+                "Fecha de Fin: " + fechaFin + "\n" +
+                "Usuario ID: " + usuarioId + "\n" +
+                "Libro ID: " + libroId;
     }
 }
