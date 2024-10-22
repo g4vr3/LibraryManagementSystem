@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.sql.*;
 
 /**
- * The type DDL (Data Definition Language) handles database connection,
+ * The DDL (Data Definition Language) class handles database connection,
  * checking if the database exists and executing the SQL script to create it if necessary.
  *
  * @version 1.0
@@ -31,12 +31,13 @@ public class DDL {
         try {
             Class.forName("org.mariadb.jdbc.Driver"); // Load MariaDB driver
             conn = DriverManager.getConnection(URL, USER, PASS); // Connect without specifying a database
+            conn.setAutoCommit(true); // Enable auto-commit
 
             // Check if the database exists
             if (!databaseExists()) {
-                System.out.println("La base de datos no existe. Creando base de datos...");
+                System.out.println("The database does not exist. Creating database...");
                 createDatabase();  // Create the database
-                System.out.println("Base de datos creada.");
+                System.out.println("Database created.");
 
                 // Execute the SQL script to set up the database schema and insert initial data
                 executeSQLScript();
@@ -46,13 +47,13 @@ public class DDL {
             Statement st = conn.createStatement();
             st.execute("USE " + DB);
         } catch (ClassNotFoundException e) {
-            System.err.println("Error: Driver de base de datos no encontrado.");
+            System.err.println("Error: Database driver not found.");
             e.printStackTrace();
         } catch (SQLException e) {
-            System.err.println("Error al conectar o ejecutar SQL: " + e.getMessage());
+            System.err.println("Error connecting or executing SQL: " + e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            System.err.println("Error al leer el archivo SQL: " + e.getMessage());
+            System.err.println("Error reading the SQL file: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -94,23 +95,49 @@ public class DDL {
 
             StringBuilder sql = new StringBuilder();
             String line;
+
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
+
                 if (line.isEmpty() || line.startsWith("--") || line.startsWith("/*")) {
-                    // ignore empty lines and comments
+                    // Ignore empty lines and full-line comments
                     continue;
                 }
-                sql.append(line).append(" ");  // add line
+
+                // Remove any inline comments starting with "--"
+                int commentIndex = line.indexOf("--");
+                if (commentIndex != -1) {
+                    line = line.substring(0, commentIndex).trim();
+                }
+
+                // Accumulate lines until a command ends with a semicolon
+                sql.append(line).append(" ");
                 if (line.endsWith(";")) {
-                    // execute sentence
-                    stmt.execute(sql.toString());
-                    sql.setLength(0);  // clear buffer
+                    // Execute the complete command
+                    try {
+                        stmt.execute(sql.toString().trim()); // Execute the full SQL command
+                        sql.setLength(0); // Clear the buffer for the next command
+                    } catch (SQLException e) {
+                        System.err.println("Error executing SQL line: " + sql.toString().trim());
+                        System.err.println("Error: " + e.getMessage());
+                        throw e; // Re-throw the exception for further handling
+                    }
                 }
             }
-        } catch (IOException | SQLException e) {
-            System.err.println("Error al ejecutar el script SQL: " + e.getMessage());
+
+            // In case there's any remaining SQL command that wasn't terminated by a semicolon
+            if (!sql.isEmpty()) {
+                try {
+                    stmt.execute(sql.toString().trim());
+                } catch (SQLException e) {
+                    System.err.println("Error executing remaining SQL line: " + sql.toString().trim());
+                    System.err.println("Error: " + e.getMessage());
+                    throw e;
+                }
+            }
         }
     }
+
 
     /**
      * Gets the database connection.
