@@ -61,10 +61,8 @@ public class DTOAutor {
      */
     @Override
     public String toString() {
-        return "DTOAutor{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                '}';
+        return "ID: " + id + "\n" +
+                "Nombre: " + nombre;
     }
 }
 

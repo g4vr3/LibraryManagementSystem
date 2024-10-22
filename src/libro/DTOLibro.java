@@ -82,10 +82,8 @@ public class DTOLibro {
      */
     @Override
     public String toString() {
-        return "DTOLibro{" +
-                "id=" + id +
-                ", titulo='" + titulo + '\'' +
-                ", isbn=" + isbn +
-                '}';
+        return "ID: " + id + "\n" +
+                "Título: " + titulo + "\n" +
+                "ISBN: " + isbn;
     }
 }

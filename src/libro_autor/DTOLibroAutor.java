@@ -63,9 +63,8 @@ public class DTOLibroAutor {
      */
     @Override
     public String toString() {
-        return "DTOLibroAutor{" +
-                "libroId=" + libroId +
-                ", autorId=" + autorId +
-                '}';
+        return "Libro ID: " + libroId + "\n" +
+                "Autor ID: " + autorId;
     }
+
 }
