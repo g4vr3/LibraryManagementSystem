@@ -76,19 +76,31 @@ public class LibroAutorService {
      * Deletes all book-author relationships associated with a specific book ID.
      *
      * @param libroId The ID of the book.
+     * @throws ServiceException if there are no relations to delete for the given book ID
      */
-    public void deleteRelationsByLibroId(int libroId)  {
-        // Remove relation from memory
-        libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getLibroId() == libroId);
+    public void deleteRelationsByLibroId(int libroId) throws ServiceException {
+        // Check if there are relations to delete
+        boolean removed = libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getLibroId() == libroId);
+
+        // Throw exception if no relations were found for the given book ID
+        if (!removed) {
+            throw new ServiceException("No se encontraron relaciones para eliminar para el libro con ID: " + libroId);
+        }
     }
 
     /**
      * Deletes all book-author relationships associated with a specific author ID.
      *
      * @param autorId The ID of the author.
+     * @throws ServiceException if there are no relations to delete for the given author ID
      */
-    public void deleteRelationsByAutorId(int autorId) {
-        // Remove relation from memory
-        libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getAutorId() == autorId);
+    public void deleteRelationsByAutorId(int autorId) throws ServiceException {
+        // Check if there are relations to delete
+        boolean removed = libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getAutorId() == autorId);
+
+        // Throw exception if no relations were found for the given author ID
+        if (!removed) {
+            throw new ServiceException("No se encontraron relaciones para eliminar para el autor con ID: " + autorId);
+        }
     }
 }
