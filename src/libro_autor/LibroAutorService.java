@@ -3,6 +3,7 @@ package libro_autor;
 import exception.ServiceException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -78,11 +79,8 @@ public class LibroAutorService {
      * @throws ServiceException If an error occurs during deletion.
      */
     public void deleteRelationsByLibroId(int libroId) throws ServiceException {
-        for (DTOLibroAutor dtoLibroAutor : libroAutorInMemory) {
-            if (dtoLibroAutor.getLibroId() == libroId) {
-                libroAutorInMemory.remove(dtoLibroAutor); // Remove relation from memory
-            }
-        }
+        // Remove relation from memory
+        libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getLibroId() == libroId);
     }
 
     /**
@@ -92,10 +90,7 @@ public class LibroAutorService {
      * @throws ServiceException If an error occurs during deletion.
      */
     public void deleteRelationsByAutorId(int autorId) throws ServiceException {
-        for (DTOLibroAutor dtoLibroAutor : libroAutorInMemory) {
-            if (dtoLibroAutor.getAutorId() == autorId) {
-                libroAutorInMemory.remove(dtoLibroAutor); // Remove relation from memory
-            }
-        }
+        // Remove relation from memory
+        libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getAutorId() == autorId);
     }
 }
