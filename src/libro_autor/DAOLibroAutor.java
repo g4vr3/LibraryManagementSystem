@@ -9,12 +9,12 @@ import java.util.ArrayList;
 /**
  * The DAOLibroAutor class handles CRUD operations for the Libro_Autor (Book_Author) relationship.
  *
- * @version 1.1.1
+ * @version 1.1.2
  */
 public class DAOLibroAutor {
-    private static final String CREATE = "INSERT INTO Libro_Autor (libroId, autorId) VALUES (?, ?)";
-    private static final String READ_BY_LIBRO = "SELECT * FROM Libro_Autor WHERE libroId = ?";
-    private static final String READ_BY_AUTOR = "SELECT * FROM Libro_Autor WHERE autorId = ?";
+    private static final String CREATE = "INSERT INTO Libro_Autor (idAutor, idLibro) VALUES (?, ?)";
+    private static final String READ_BY_LIBRO = "SELECT * FROM Libro_Autor WHERE idLibro = ?";
+    private static final String READ_BY_AUTOR = "SELECT * FROM Libro_Autor WHERE idAutor = ?";
     private static final String READ_ALL = "SELECT * FROM Libro_Autor";
     private static Connection conexion;
 
