@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Service class for managing the many-to-many relationship between books and authors.
  *
- * @version 1.0.2
+ * @version 1.0.3
  */
 public class LibroAutorService {
     private List<DTOLibroAutor> libroAutorInMemory;
@@ -92,15 +92,8 @@ public class LibroAutorService {
      * Deletes all book-author relationships associated with a specific author ID.
      *
      * @param autorId The ID of the author.
-     * @throws ServiceException if there are no relations to delete for the given author ID
      */
-    public void deleteRelationsByAutorId(int autorId) throws ServiceException {
-        // Check if there are relations to delete
-        boolean removed = libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getAutorId() == autorId);
-
-        // Throw exception if no relations were found for the given author ID
-        if (!removed) {
-            throw new ServiceException("No se encontraron relaciones para eliminar para el autor con ID: " + autorId);
-        }
+    public void deleteRelationsByAutorId(int autorId) {
+        libroAutorInMemory.removeIf(dtoLibroAutor -> dtoLibroAutor.getAutorId() == autorId);
     }
 }
