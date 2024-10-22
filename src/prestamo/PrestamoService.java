@@ -129,7 +129,53 @@ public class PrestamoService {
                 return dtoPrestamo;
             }
         }
-        throw new ServiceException("Loan not found.");
+        throw new ServiceException("Préstamo no encontrado.");
+    }
+
+    /**
+     * Finds all loans by the user id.
+     *
+     * @param usuarioId the user id
+     * @return a list of all loan DTOs with this user id
+     * @throws ServiceException if no loans are found for the given user id
+     */
+    public List<DTOPrestamo> findPrestamosByUsuarioId(Integer usuarioId) throws ServiceException {
+        List<DTOPrestamo> prestamosPorUsuario = new ArrayList<>();
+        for (DTOPrestamo dtoPrestamo : prestamosInMemory) {
+            if (dtoPrestamo.getUsuarioId() == usuarioId) {
+                prestamosPorUsuario.add(dtoPrestamo);
+            }
+        }
+
+        // Throw exception if no loans are found
+        if (prestamosPorUsuario.isEmpty()) {
+            throw new ServiceException("Ningún préstamo encontrado para el usuario con ID: " + usuarioId);
+        }
+
+        return prestamosPorUsuario;
+    }
+
+    /**
+     * Finds all loans by the book id.
+     *
+     * @param libroId the book id
+     * @return a list of all loan DTOs with this book id
+     * @throws ServiceException if no loans are found for the given book id
+     */
+    public List<DTOPrestamo> findPrestamosByLibroId(Integer libroId) throws ServiceException {
+        List<DTOPrestamo> prestamosPorLibro = new ArrayList<>();
+        for (DTOPrestamo dtoPrestamo : prestamosInMemory) {
+            if (dtoPrestamo.getLibroId() == libroId) {
+                prestamosPorLibro.add(dtoPrestamo);
+            }
+        }
+
+        // Throw exception if no loans are found
+        if (prestamosPorLibro.isEmpty()) {
+            throw new ServiceException("Ningún préstamo encontrado para el libro con ID: " + libroId);
+        }
+
+        return prestamosPorLibro;
     }
 
     /**
@@ -139,9 +185,8 @@ public class PrestamoService {
      * @param fechaInicio the start date to check
      * @param fechaFin the end date to check
      * @return true if the book is loaned during the specified period, false otherwise
-     * @throws ServiceException if there is an error during the check
      */
-    private boolean isLibroPrestado(int libroId, Date fechaInicio, Date fechaFin) throws ServiceException {
+    private boolean isLibroPrestado(int libroId, Date fechaInicio, Date fechaFin) {
         for (DTOPrestamo dtoPrestamo : prestamosInMemory) {
             // Check for overlaps
             if (dtoPrestamo.getLibroId() == libroId &&
