@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /**
  * The DAOLibroAutor class handles CRUD operations for the Libro_Autor (Book_Author) relationship.
  *
- * @version 1.1
+ * @version 1.1.1
  */
 public class DAOLibroAutor {
     private static final String CREATE = "INSERT INTO Libro_Autor (libroId, autorId) VALUES (?, ?)";
@@ -111,8 +111,8 @@ public class DAOLibroAutor {
      */
     private DTOLibroAutor getLibroAutor(ResultSet rs) throws ServiceException {
         try {
-            int libroId = rs.getInt("libroId");
-            int autorId = rs.getInt("autorId");
+            int libroId = rs.getInt("idLibro");
+            int autorId = rs.getInt("idAutor");
             return new DTOLibroAutor(libroId, autorId);
         } catch (SQLException e) {
             throw new ServiceException("Error al leer ResultSet: " + e.getMessage());
