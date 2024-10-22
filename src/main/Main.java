@@ -7,12 +7,15 @@ import ui.UI;
 
 /**
  * The type Main.
+ * * @author Izan Gómez de la Fuente
+ *  * @author Javier Agudo Fernández
  */
 public class Main {
     /**
      * The entry point of application.
      *
      * @param args the input arguments
+     *
      */
     public static void main(String[] args) {
         DDL.getConnection();
