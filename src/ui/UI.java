@@ -1,10 +1,13 @@
 package ui;
 
 import autor.AutorService;
+import autor.DTOAutor;
 import exception.ServiceException;
+import libro.DTOLibro;
 import libro.LibroService;
 import libro_autor.LibroAutorService;
 import prestamo.PrestamoService;
+import usuario.DTOUsuario;
 import usuario.UsuarioService;
 
 import java.awt.*;
@@ -171,7 +174,7 @@ public class UI extends JFrame {
         // Operation definitions for each entity
         String[] actions;
         switch (currentEntity) {
-            case "PRÉSTAMO" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Usuario"};
+            case "PRÉSTAMO" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Usuario", "Eliminar"};
             case "LIBRO_AUTOR" -> actions = new String[]{"Crear", "Buscar por Libro", "Buscar por Autor"};
             default -> actions = new String[]{"Crear", "Buscar", "Actualizar", "Eliminar"};
         }
@@ -249,22 +252,8 @@ public class UI extends JFrame {
                 }
             }
             case "Eliminar" -> {
-                switch (currentEntity) {
-                    case "LIBRO", "AUTOR", "USUARIO" -> {
-                        addField("ID");
-                        fieldCount = 1;
-                    }
-                    case "PRÉSTAMO" -> {
-                        addField("ID Libro");
-                        addField("ID Usuario");
-                        fieldCount = 2;
-                    }
-                    case "LIBRO_AUTOR" -> {
-                        addField("ID Libro");
-                        addField("ID Autor");
-                        fieldCount = 2;
-                    }
-                }
+                addField("ID");
+                fieldCount = 1;
             }
             default -> throw new IllegalStateException("Unexpected value: " + action);
         }
@@ -301,62 +290,152 @@ public class UI extends JFrame {
     }
 
     private void doCrudAction() {
+        try {
+            libroAutorService = new LibroAutorService();
+            libroService = new LibroService(libroAutorService);
+            autorService = new AutorService(libroAutorService);
+            prestamoService = new PrestamoService();
+            usuarioService = new UsuarioService();
+        } catch (ServiceException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
         switch (currentEntity) {
             case "LIBRO":
-                try {
-                    libroService = new LibroService(new LibroAutorService());
-                    JOptionPane.showMessageDialog(this, currentAction + " " + currentEntity + " completado!");
-                } catch (ServiceException e) {
-                    JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
+
                 switch (currentAction) {
                     case "Crear":
                         // check the fields are completed
                         if (!areFieldsFilled("Título", "ISBN")) {
-                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            showWarningMessage("Rellena todos los campos", "Campos incompletos");
                             return;  // stop
                         }
-                        String title = inputFields.get("Título").getText();
-                        String isbn = inputFields.get("ISBN").getText();
+
                         try {
+                            String title = inputFields.get("Título").getText();
+                            String isbn = inputFields.get("ISBN").getText();
                             libroService.createLibro(title, isbn);
+                            showConfirmMessage();
                         } catch (ServiceException e) {
-                            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            showErrorMessage(e);
                         }
                         break;
 
                     case "Buscar":
-                        String id = inputFields.get("ID").getText();
+                        if (!areFieldsFilled("ID") ) {
+                            showWarningMessage("El ID es obligatorio para buscar", "Campos incompletos");
+                            return;  // stop
+                        }
+                        try {
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            DTOLibro libro = libroService.findLibroById(id);
+                            if (libro != null) {
+                                JOptionPane.showMessageDialog(this, libro.toString(), "Libro encontrado", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
 
                     case "Actualizar":
+                        try {
+                            if (!areFieldsFilled("ID") ) {
+                                showWarningMessage("El ID es obligatorio para actualizar", "Campos incompletos");
+                                return;  // stop
+                            } else if (!areFieldsFilled("Titulo") && !areFieldsFilled("ISBN")) {
+                                showWarningMessage("Rellena al menos un campo para actualizar", "Campos incompletos");
+                                return;
+                            }
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            String title = inputFields.get("Título").getText();
+                            String isbn = inputFields.get("ISBN").getText();
+                            libroService.updateLibro(id,title,isbn);
+                            showConfirmMessage();
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
 
                     case "Eliminar":
-                        id = inputFields.get("ID").getText();
+                        if (!areFieldsFilled("ID")) {
+                            showWarningMessage("El ID es obligatorio para eliminar", "Campos incompletos");
+                            return;  // stop
+                        }
+                        try {
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            libroService.deleteLibro(id);
+                            showConfirmMessage();
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
                 }
                 break;
 
             case "AUTOR":
+
                 switch (currentAction) {
                     case "Crear":
                         if (!areFieldsFilled("Nombre")) {
-                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            showWarningMessage("Rellena todos los campos", "Campos incompletos");
                             return;
                         }
-                        String nombre = inputFields.get("Nombre").getText();
+                        try {
+                            String nombre = inputFields.get("Nombre").getText();
+                            autorService.createAutor(nombre);
+                            showConfirmMessage();
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
+
                         break;
 
                     case "Buscar":
-                        String id = inputFields.get("ID").getText();
+                        if (!areFieldsFilled("ID")) {
+                            showWarningMessage("El ID es obligatorio para buscar", "Campos incompletos");
+                            return;
+                        }
+
+                        try {
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            DTOAutor autor = autorService.findAutorById(id);
+                            if (autor != null) {
+                                JOptionPane.showMessageDialog(this, autor.toString(), "Autor encontrado", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
 
                     case "Actualizar":
+                        if (!areFieldsFilled("ID") ) {
+                            showWarningMessage("El ID es obligatorio para actualizar", "Campos incompletos");
+                            return;  // stop
+                        } else if (!areFieldsFilled("Nombre")) {
+                            showWarningMessage("Rellena al menos un campo para actualizar", "Campos incompletos");
+                            return;
+                        }
+                        try{
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            String nombre = inputFields.get("Nombre").getText();
+                            autorService.updateAutor(id,nombre);
+                        } catch (ServiceException e){
+                            showErrorMessage(e);
+                        }
                         break;
 
                     case "Eliminar":
-                        id = inputFields.get("ID").getText();
+                        if (!areFieldsFilled("ID")) {
+                            showWarningMessage("El ID es obligatorio para eliminar", "Campos incompletos");
+                            return;
+                        }
+                        try {
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            autorService.deleteAutor(id);
+                            showConfirmMessage();
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
                 }
                 break;
@@ -365,21 +444,63 @@ public class UI extends JFrame {
                 switch (currentAction) {
                     case "Crear":
                         if (!areFieldsFilled("Nombre")) {
-                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            showWarningMessage("Rellena todos los campos", "Campos incompletos");
                             return;
                         }
-                        String nombre = inputFields.get("Nombre").getText();
+
+                        try {
+                            String nombre = inputFields.get("Nombre").getText();
+                            usuarioService.createUsuario(nombre);
+                            showConfirmMessage();
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
 
                     case "Buscar":
-                        String id = inputFields.get("ID").getText();
+                        if (!areFieldsFilled("ID")) {
+                            showWarningMessage("Rellena todos los campos", "Campos incompletos");
+                            return;
+                        }
+                        try {
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            DTOUsuario usuario = usuarioService.findUsuarioById(id);
+                            if (usuario != null) {
+                                JOptionPane.showMessageDialog(this, usuario.toString(), "Usuario encontrado", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
 
                     case "Actualizar":
-                        break;
+                        if (!areFieldsFilled("ID") ) {
+                            showWarningMessage("El ID es obligatorio para actualizar", "Campos incompletos");
+                            return;  // stop
+                        } else if (!areFieldsFilled("Nombre")) {
+                            showWarningMessage("Rellena al menos un campo para actualizar", "Campos incompletos");
+                            return;
+                        }
+                        try{
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            String nombre = inputFields.get("Nombre").getText();
+                            autorService.updateAutor(id,nombre);
+                        } catch (ServiceException e){
+                            showErrorMessage(e);
+                        }
 
                     case "Eliminar":
-                        id = inputFields.get("ID").getText();
+                        if (!areFieldsFilled("ID")) {
+                            showWarningMessage("Rellena todos los campos", "Campos incompletos");
+                            return;
+                        }
+                        try {
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            usuarioService.deleteUsuario(id);
+                            showConfirmMessage();
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
                 }
                 break;
@@ -388,7 +509,7 @@ public class UI extends JFrame {
                 switch (currentAction) {
                     case "Crear":
                         if (!areFieldsFilled("ID Libro", "ID Usuario")) {
-                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            showWarningMessage("Rellena todos los campos", "Campos incompletos");
                             return;
                         }
                         String libroId = inputFields.get("ID Libro").getText();
@@ -396,11 +517,29 @@ public class UI extends JFrame {
                         break;
 
                     case "Buscar por Libro":
+                        if (!areFieldsFilled("ID Libro")) {
+                            showWarningMessage("El ID es obligatorio para buscar", "Campos incompletos");
+                            return;
+                        }
                         libroId = inputFields.get("ID Libro").getText();
                         break;
 
                     case "Buscar por Usuario":
                         usuarioId = inputFields.get("ID Usuario").getText();
+                        break;
+
+                    case "Eliminar":
+                        if (!areFieldsFilled("ID")) {
+                            showWarningMessage("El ID es obligatorio para eliminar", "Campos incompletos");
+                            return;
+                        }
+                        try {
+                            Integer id = Integer.parseInt(inputFields.get("ID").getText());
+                            prestamoService.deletePrestamo(id);
+                            showConfirmMessage();
+                        } catch (ServiceException e) {
+                            showErrorMessage(e);
+                        }
                         break;
                 }
                 break;
@@ -409,7 +548,7 @@ public class UI extends JFrame {
                 switch (currentAction) {
                     case "Crear":
                         if (!areFieldsFilled("ID Libro", "ID Autor")) {
-                            JOptionPane.showMessageDialog(this, "Por favor, rellena todos los campos.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
+                            showWarningMessage("Rellena todos los campos", "Campos incompletos");
                             return;
                         }
                         String libroId = inputFields.get("ID Libro").getText();
@@ -426,17 +565,31 @@ public class UI extends JFrame {
                 }
                 break;
         }
+
     }
 
     private boolean areFieldsFilled(String... fieldKeys) {
         for (String key : fieldKeys) {
             JTextField field = inputFields.get(key);
             if (field == null || field.getText().trim().isEmpty()) {
-                return false;  // one field is uncompleted at least
+                return false;
             }
         }
-        return true;  // all the fields are completed
+        return true;
     }
+
+    private void showWarningMessage(String message, String title) {
+        JOptionPane.showMessageDialog(this, message,title ,JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void showConfirmMessage() {
+        JOptionPane.showMessageDialog(this, currentAction + " " + currentEntity + " completado!");
+    }
+
+    private void showErrorMessage(Exception e) {
+        JOptionPane.showMessageDialog(this, e.getMessage(), "Error al" + currentAction+ " " + currentEntity, JOptionPane.ERROR_MESSAGE);
+    }
+
 
 
 }

@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Service class for managing books (DTOLibro) and their relations with authors through LibroAutorService.
  *
- * @version 1.0
+ * @version 1.1
  */
 public class LibroService {
     private List<DTOLibro> librosInMemory;
@@ -62,8 +62,12 @@ public class LibroService {
     public void updateLibro(Integer id, String titulo, String isbn) throws ServiceException {
         DTOLibro dtoLibro = findLibroById(id);
         if (dtoLibro != null) {
-            dtoLibro.setTitulo(titulo);
-            dtoLibro.setIsbn(isbn); // Update the book details
+            if (titulo != null && !titulo.isBlank() && !titulo.isEmpty()){
+                dtoLibro.setTitulo(titulo);
+            }
+            if (isbn != null && !isbn.isBlank() && !isbn.isEmpty()) {
+                dtoLibro.setIsbn(isbn); // Update the book details
+            }
             daoLibro.update(dtoLibro); // Sync with the database
         } else {
             throw new ServiceException("El libro que intentas actualizar no existe");

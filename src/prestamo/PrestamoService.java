@@ -11,7 +11,7 @@ import java.util.List;
  * Service class for managing loans (prestamos).
  * Provides methods for creating, reading, updating, and deleting loans.
  *
- * @version 1.0
+ * @version 1.1
  */
 public class PrestamoService {
     private List<DTOPrestamo> prestamosInMemory;
@@ -89,7 +89,6 @@ public class PrestamoService {
             if (isLibroPrestado(libroId, dtoPrestamo.getFechaInicio(), fechaFin)) {
                 throw new ServiceException("The book is already loaned during those dates.");
             }
-
             dtoPrestamo.setFechaFin(fechaFin);
             dtoPrestamo.setUsuarioId(usuarioId);
             dtoPrestamo.setLibroId(libroId);

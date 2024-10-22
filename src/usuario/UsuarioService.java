@@ -8,7 +8,7 @@ import java.util.List;
  * Service class for managing users (usuarios).
  * Provides methods for creating, reading, updating, and deleting users.
  *
- * @version 1.0
+ * @version 1.1
  */
 public class UsuarioService {
     private List<DTOUsuario> usuariosInMemory;
@@ -58,6 +58,9 @@ public class UsuarioService {
     public void updateUsuario(Integer id, String nombre) throws ServiceException {
         DTOUsuario dtoUsuario = findUsuarioById(id);
         if (dtoUsuario != null) {
+            if (nombre != null && !nombre.isBlank() && !nombre.isEmpty()) {
+                dtoUsuario.setNombre(nombre);
+            }
             dtoUsuario.setNombre(nombre);
             daoUsuario.update(dtoUsuario);
         } else {
