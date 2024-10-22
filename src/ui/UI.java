@@ -23,7 +23,7 @@ public class UI extends JFrame {
     private String currentEntity;
     private String currentAction;
 
-    // Mapa para almacenar los campos por nombre
+    // key: input field name, value: field
     private HashMap<String, JTextField> inputFields;
 
     // Service integration
@@ -34,7 +34,6 @@ public class UI extends JFrame {
     private LibroAutorService libroAutorService;
 
     public UI() {
-        // Inicializar el HashMap para almacenar los campos de entrada
         inputFields = new HashMap<>();
 
         // Frame settings
@@ -59,7 +58,7 @@ public class UI extends JFrame {
     private JPanel getMainMenuPanel() {
         JPanel mainMenuPane = new JPanel(new GridLayout(7, 1, 10, 10));
         mainMenuPane.setBorder(new EmptyBorder(50, 200, 50, 200));
-        mainMenuPane.setBackground(Color.WHITE);  // Fondo blanco
+        mainMenuPane.setBackground(Color.WHITE);
 
         // Operation dynamic label
         operationLabel = new JLabel("Gestión Bibliotecaria", SwingConstants.CENTER);
@@ -78,9 +77,9 @@ public class UI extends JFrame {
             button.setFont(new Font("Tahoma", Font.PLAIN, 14));
             button.setFocusPainted(false);
             button.setBorderPainted(false);
-            button.setBackground(new Color(240, 240, 240));  // Fondo gris claro
-            button.setForeground(new Color(108, 108, 108));  // Texto gris oscuro
-            button.addActionListener(e -> showManagementPanel(entity));  // Usamos un único método para cada entidad
+            button.setBackground(new Color(240, 240, 240));
+            button.setForeground(new Color(108, 108, 108));
+            button.addActionListener(e -> showManagementPanel(entity));
             mainMenuPane.add(button);
         }
 
@@ -183,9 +182,9 @@ public class UI extends JFrame {
             button.setFont(new Font("Tahoma", Font.PLAIN, 14));
             button.setFocusPainted(false);
             button.setBorderPainted(false);
-            button.setBackground(new Color(240, 240, 240));  // Fondo gris claro
-            button.setForeground(new Color(108, 108, 108));  // Texto gris oscuro
-            button.addActionListener(e -> showCrudForm(action)); // Llamamos al método para mostrar el formulario
+            button.setBackground(new Color(240, 240, 240));
+            button.setForeground(new Color(108, 108, 108));
+            button.addActionListener(e -> showCrudForm(action));
             crudToolbar.add(button);
         }
 
@@ -197,30 +196,88 @@ public class UI extends JFrame {
     private void showCrudForm(String action) {
         currentAction = action;
         fieldsPanel.removeAll();  // Clear panel
-        inputFields.clear(); // Limpiar los campos previos
+        inputFields.clear(); // Clear input fields
 
         operationLabel.setText(action + " (" + currentEntity.toLowerCase() + ")");  // Operation label update
 
-        // Dynamic fields for current entity
-        if (action.startsWith("Buscar") || action.equals("Eliminar")) {
-            fieldsPanel.setBorder(new EmptyBorder(45, 0, 45, 0));
-            addField("ID");
-        } else if (currentEntity.equals("LIBRO")) {
-            fieldsPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
-            addField("Título");
-            addField("ISBN");
-        } else if (currentEntity.equals("AUTOR") || currentEntity.equals("USUARIO")) {
-            fieldsPanel.setBorder(new EmptyBorder(45, 0, 45, 0));
-            addField("Nombre");
-        } else if (currentEntity.equals("PRÉSTAMO")) {
-            fieldsPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
-            addField("ID Libro");
-            addField("ID Usuario");
-        } else if (currentEntity.equals("LIBRO_AUTOR")) {
-            fieldsPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
-            addField("ID Libro");
-            addField("ID Autor");
+        // Initialize a count for the number of fields to be added
+        int fieldCount = 0;
+
+// Dynamic fields for each action and entity
+        switch (action) {
+            case "Crear" -> {
+                switch (currentEntity) {
+                    case "LIBRO" -> {
+                        addField("Título");
+                        addField("ISBN");
+                        fieldCount = 2;
+                    }
+                    case "AUTOR", "USUARIO" -> {
+                        addField("Nombre");
+                        fieldCount = 1;
+                    }
+                    case "PRÉSTAMO" -> {
+                        addField("ID Libro");
+                        addField("ID Usuario");
+                        fieldCount = 2;
+                    }
+                    case "LIBRO_AUTOR" -> {
+                        addField("ID Libro");
+                        addField("ID Autor");
+                        fieldCount = 2;
+                    }
+                }
+            }
+            // case when the action starts with "Buscar"
+            case String s when s.startsWith("Buscar") -> {
+                addField("ID");
+                fieldCount = 1;
+            }
+            case "Actualizar" -> {
+                switch (currentEntity) {
+                    case "LIBRO" -> {
+                        addField("ID");
+                        addField("Título");
+                        addField("ISBN");
+                        fieldCount = 3;
+                    }
+                    case "AUTOR", "USUARIO" -> {
+                        addField("ID");
+                        addField("Nombre");
+                        fieldCount = 2;
+                    }
+                }
+            }
+            case "Eliminar" -> {
+                switch (currentEntity) {
+                    case "LIBRO", "AUTOR", "USUARIO" -> {
+                        addField("ID");
+                        fieldCount = 1;
+                    }
+                    case "PRÉSTAMO" -> {
+                        addField("ID Libro");
+                        addField("ID Usuario");
+                        fieldCount = 2;
+                    }
+                    case "LIBRO_AUTOR" -> {
+                        addField("ID Libro");
+                        addField("ID Autor");
+                        fieldCount = 2;
+                    }
+                }
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + action);
         }
+
+    // Set the border based on the number of fields added
+        if (fieldCount == 1) {
+            fieldsPanel.setBorder(new EmptyBorder(42, 0, 42, 0));
+        } else if (fieldCount == 2) {
+            fieldsPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
+        } else if (fieldCount >= 3) {
+            fieldsPanel.setBorder(null); // No border
+        }
+
 
         confirmButton.setVisible(true);
         fieldsPanel.revalidate();
