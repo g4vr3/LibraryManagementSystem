@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Service for managing authors (DTOAutor) and their relations with books via LibroAutorService.
  *
- * @version 1.0
+ * @version 1.1
  */
 public class AutorService {
     private List<DTOAutor> autoresInMemory;
@@ -60,7 +60,9 @@ public class AutorService {
     public void updateAutor(Integer id, String nombre) throws ServiceException {
         DTOAutor dtoAutor = findAutorById(id);
         if (dtoAutor != null) {
-            dtoAutor.setNombre(nombre); // Update the name
+            if (nombre != null && !nombre.isBlank() && !nombre.isEmpty()){
+                dtoAutor.setNombre(nombre); // Update the name
+            }
             daoAutor.update(dtoAutor);
         } else {
             throw new ServiceException("El autor que estas intentando actualizar no existe");
