@@ -18,6 +18,16 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * User interface for managing books, authors, users, and loans.
+ *
+ * Provides CRUD functionalities and input validation,
+ * displaying error and confirmation messages to the user.
+ *
+ * @author Izan Gómez de la Fuente
+ * @author Javier Agudo Fernández
+ * @version 1.0
+ */
 public class UI extends JFrame {
 
     private final CardLayout cardLayout;
@@ -37,6 +47,9 @@ public class UI extends JFrame {
     private PrestamoService prestamoService;
     private LibroAutorService libroAutorService;
 
+    /**
+     * Instantiates a new Ui.
+     */
     public UI() {
         inputFields = new HashMap<>();
 
@@ -59,6 +72,14 @@ public class UI extends JFrame {
         cardLayout.show(contentPane, "mainPanel");
     }
 
+    /**
+     * Creates and returns the main menu panel for the library management system.
+     * The panel includes a title label, an information label, and buttons for managing different entities.
+     * Each button corresponds to an entity (LIBRO, AUTOR, USUARIO, PRÉSTAMO, LIBRO_AUTOR) and triggers the display
+     * of the respective management panel when clicked.
+     *
+     * @return a JPanel containing the main menu interface.
+     */
     private JPanel getMainMenuPanel() {
         JPanel mainMenuPane = new JPanel(new GridLayout(7, 1, 10, 10));
         mainMenuPane.setBorder(new EmptyBorder(50, 200, 50, 200));
@@ -90,6 +111,14 @@ public class UI extends JFrame {
         return mainMenuPane;
     }
 
+    /**
+     * Creates and returns the management panel for the library system.
+     * The panel includes a toolbar for CRUD operations, a dynamic label to display the selected operation,
+     * a dynamic form panel for input fields, and a confirm button for the selected action.
+     * Also includes a button to return to the home menu.
+     *
+     * @return a JPanel containing the management interface for CRUD operations.
+     */
     private JPanel getManagementPanel() {
         JPanel managementPanel = new JPanel();
         managementPanel.setLayout(new BorderLayout(10, 10));
@@ -132,7 +161,14 @@ public class UI extends JFrame {
 
         return managementPanel;
     }
-
+    /**
+     * Creates and returns the confirm button for the CRUD operations.
+     * The button is initially hidden and becomes visible when an operation is selected.
+     * It triggers the execution of a CRUD action when clicked.
+     * The button is styled with a custom background, font, and cursor.
+     *
+     * @return a JButton for confirming CRUD actions.
+     */
     private JButton getConfirmButton() {
         confirmButton = new JButton("Confirmar");
         confirmButton.setVisible(false); // hidden at start
@@ -147,6 +183,13 @@ public class UI extends JFrame {
         confirmButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return confirmButton;
     }
+    /**
+     * Creates and returns the home button that navigates back to the main menu.
+     * When clicked, it resets the management panel and switches the view to the main menu panel.
+     * The button is styled with a custom background and font for visual consistency.
+     *
+     * @return a JButton for navigating back to the main menu.
+     */
 
     private JButton getHomeButton() {
         JButton homeButton = new JButton("Volver al Menú Principal");
@@ -161,14 +204,22 @@ public class UI extends JFrame {
         });
         return homeButton;
     }
-
+    /**
+     * Displays the management panel for the specified entity.
+     * Resets the management panel and updates the CRUD toolbar before showing the panel.
+     *
+     * @param entity the entity to manage (e.g., LIBRO, AUTOR, USUARIO).
+     */
     private void showManagementPanel(String entity) {
         currentEntity = entity;
         resetManagementPanel();
         updateCrudToolbar();
         cardLayout.show(contentPane, "managementPanel");
     }
-
+    /**
+     * Updates the CRUD toolbar based on the current entity.
+     * Clears existing buttons, defines new action buttons, and sets the operation label.
+     */
     private void updateCrudToolbar() {
         crudToolbar.removeAll(); // Clear panel
 
@@ -196,7 +247,14 @@ public class UI extends JFrame {
         crudToolbar.repaint();
         operationLabel.setText("Selecciona una operación para " + currentEntity.toLowerCase());
     }
-
+    /**
+     * Displays the CRUD form for the specified action and current entity.
+     * Clears existing fields and sets up dynamic input fields based on the action.
+     * Updates the operation label and adjusts the panel border according to the number of fields.
+     *
+     * @param action the CRUD action to perform (e.g., Crear, Buscar, Actualizar, Eliminar).
+     * @throws IllegalStateException if an unexpected action is provided.
+     */
     private void showCrudForm(String action) {
         currentAction = action;
         fieldsPanel.removeAll();  // Clear panel
@@ -232,7 +290,7 @@ public class UI extends JFrame {
                     }
                 }
             }
-            // case when the action starts with "Buscar"
+            // Case when the action starts with "Buscar"
             case String s when s.startsWith("Buscar") -> {
                 addField("ID");
                 fieldCount = 1;
@@ -274,6 +332,11 @@ public class UI extends JFrame {
         fieldsPanel.repaint();
     }
 
+    /**
+     * Adds a labeled input field to the fields panel.
+     * Stores the JTextField in a map for later access.
+     * @param labelText the text to display on the label for the input field.
+     */
     private void addField(String labelText) {
         JLabel label = new JLabel(labelText, SwingConstants.LEFT);
         JTextField field = new JTextField();
@@ -281,6 +344,10 @@ public class UI extends JFrame {
         fieldsPanel.add(label);
         fieldsPanel.add(field);
     }
+    /**
+     * Resets the management panel by clearing all input fields and hiding the confirm button.
+     * Updates the panel to show the changes.
+     */
 
     private void resetManagementPanel() {
         fieldsPanel.removeAll();          // Clear panel
@@ -289,14 +356,19 @@ public class UI extends JFrame {
         fieldsPanel.revalidate();
         fieldsPanel.repaint();
     }
-
+    /**
+     * Executes the current CRUD action based on the selected entity and action.
+     * Instantiate service classes and performs the requested operation, showing appropriate
+     * messages based on the success or the failure of this operations.
+     */
     private void doCrudAction() {
         try {
             libroAutorService = new LibroAutorService();
             libroService = new LibroService(libroAutorService);
             autorService = new AutorService(libroAutorService);
-            prestamoService = new PrestamoService();
             usuarioService = new UsuarioService();
+            prestamoService = new PrestamoService(libroService,usuarioService);
+
         } catch (ServiceException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -596,7 +668,11 @@ public class UI extends JFrame {
                             libroAutorService.createLibroAutor(libroId, autorId);
                             showConfirmMessage();
                         } catch (ServiceException e) {
-                            showErrorMessage(e);
+                            if (e.getMessage().contains("foreign")){
+                                JOptionPane.showMessageDialog(this, "El libro o el autor no existen", "Error al " + currentAction.toLowerCase() + " " + currentEntity.toLowerCase(), JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                showErrorMessage(e);
+                            }
                         }
                         break;
 
@@ -647,6 +723,12 @@ public class UI extends JFrame {
 
     }
 
+    /**
+     * Checks if the specified fields are filled
+     *
+     * @param fieldKeys the keys of the fields to check
+     * @return true if all specified fields are filled; false if not
+     */
     private boolean areFieldsFilled(String... fieldKeys) {
         for (String key : fieldKeys) {
             JTextField field = inputFields.get(key);
@@ -657,15 +739,30 @@ public class UI extends JFrame {
         return true;
     }
 
+    /**
+     * Displays a warning message dialog with a specific message and a title.
+     *
+     * @param message the message to display
+     * @param title the title of the dialog
+     */
     private void showWarningMessage(String message, String title) {
         JOptionPane.showMessageDialog(this, message, title, JOptionPane.WARNING_MESSAGE);
     }
 
+    /**
+     * Displays a confirmation message dialog indicating the completion of the current action.
+     */
     private void showConfirmMessage() {
         JOptionPane.showMessageDialog(this, currentAction + " " + currentEntity.toLowerCase() + " completado!");
     }
 
+    /**
+     * Displays an error message dialog with the specified exception message.
+     *
+     * @param e the exception whose message is going to be displayed
+     */
     private void showErrorMessage(Exception e) {
         JOptionPane.showMessageDialog(this, e.getMessage(), "Error al " + currentAction.toLowerCase() + " " + currentEntity.toLowerCase(), JOptionPane.ERROR_MESSAGE);
     }
+
 }

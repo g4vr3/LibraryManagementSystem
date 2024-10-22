@@ -1,6 +1,9 @@
 package prestamo;
 
+import autor.AutorService;
 import exception.ServiceException;
+import libro.LibroService;
+import usuario.UsuarioService;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -11,9 +14,11 @@ import java.util.List;
  * Service class for managing loans (prestamos).
  * Provides methods for creating, reading, updating, and deleting loans.
  *
- * @version 1.1
+ * @version 1.2
  */
 public class PrestamoService {
+    private LibroService libroService;
+    private UsuarioService usuarioService;
     private List<DTOPrestamo> prestamosInMemory;
     private DAOPrestamo daoPrestamo;
 
@@ -23,7 +28,9 @@ public class PrestamoService {
      *
      * @throws ServiceException if there is an error while reading loans from the data source
      */
-    public PrestamoService() throws ServiceException {
+    public PrestamoService(LibroService libroService, UsuarioService usuarioService) throws ServiceException {
+        this.libroService = libroService;
+        this.usuarioService = usuarioService;
         this.daoPrestamo = new DAOPrestamo();
         prestamosInMemory = daoPrestamo.readAll();
     }
@@ -37,6 +44,13 @@ public class PrestamoService {
      * @throws ServiceException if the end date is before the start date or if the book is already loaned
      */
     public void createPrestamo(int usuarioId, int libroId) throws ServiceException {
+        // Check if user and book exists
+        try {
+            usuarioService.findUsuarioById(usuarioId);
+            libroService.findLibroById(libroId);
+        } catch (ServiceException e){
+            throw new ServiceException(e.getMessage());
+        }
         // Get today's date as the start date
         Date fechaInicio = Date.valueOf(LocalDate.now());
 
